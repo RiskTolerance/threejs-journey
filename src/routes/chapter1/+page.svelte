@@ -1,36 +1,41 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { createScene, createCamera, createRenderer, createCube } from './threeHelpers';
 	import * as THREE from 'three';
-	// import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-	// import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-	function animate() {
-		cube.rotation.x += 0.01;
-		cube.rotation.y += 0.01;
-		renderer.render(scene, camera);
-	}
-
-	let renderer;
-	let scene;
-	let camera;
-	let threeContainer;
-	let cube;
+	let threeContainer: HTMLElement | null = null;
 
 	onMount(() => {
-		scene = new THREE.Scene();
-		camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-		renderer = new THREE.WebGLRenderer();
-		renderer.setSize(window.innerWidth, window.innerHeight);
-		threeContainer = document.querySelector('#three');
-		console.log(threeContainer);
-		document.querySelector('#three')?.appendChild(renderer.domElement);
-		const geometry = new THREE.BoxGeometry(1, 1, 1);
-		const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-		cube = new THREE.Mesh(geometry, material);
-		scene.add(cube);
-		camera.position.z = 5;
+		const scene = createScene();
+		const camera = createCamera();
+		const renderer = createRenderer();
+
+		if (threeContainer) {
+			threeContainer.appendChild(renderer.domElement);
+		}
+
+		const cube = createCube(scene);
+
+		function animate() {
+			cube.rotation.x += 0.01;
+			cube.rotation.y += 0.01;
+			renderer.render(scene, camera);
+		}
+
 		renderer.setAnimationLoop(animate);
+
+		const onResize = () => {
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+			renderer.setSize(window.innerWidth, window.innerHeight);
+		};
+
+		window.addEventListener('resize', onResize);
+
+		return () => {
+			window.removeEventListener('resize', onResize);
+		};
 	});
 </script>
 
-<div class="h-screen w-screen bg-black" id="three"></div>
+<div class="h-screen w-screen bg-black" id="three" bind:this={threeContainer}></div>
