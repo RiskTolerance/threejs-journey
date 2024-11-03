@@ -10,7 +10,7 @@ export function createCamera(x: number, y: number, z: number) {
  	   75,
  	   window.innerWidth / window.innerHeight,
  	   0.1,
- 	   1000
+ 	   100
     );
     camera.position.set(x, y, z);
     return camera;
@@ -19,6 +19,7 @@ export function createCamera(x: number, y: number, z: number) {
 export function createRenderer() {
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     return renderer;
 }
 

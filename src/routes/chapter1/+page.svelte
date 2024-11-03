@@ -10,8 +10,20 @@
 	import * as THREE from 'three';
 	import gsap from 'gsap';
 	import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+	import Fullscreen from '$lib/components/icons/Fullscreen.svelte';
 
 	let threeContainer: HTMLElement | null = null;
+
+	const fullscreen = () => {
+		if (threeContainer && !document.fullscreenElement) {
+			console.log('go fullscreen!');
+			threeContainer.requestFullscreen();
+		} else if (document.fullscreenElement) {
+			document.exitFullscreen();
+		} else {
+			console.log('No element!');
+		}
+	};
 
 	onMount(() => {
 		const scene = createScene();
@@ -52,6 +64,7 @@
 		renderer.setAnimationLoop(animate);
 
 		const onResize = () => {
+			renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 			camera.aspect = window.innerWidth / window.innerHeight;
 			camera.updateProjectionMatrix();
 			renderer.setSize(window.innerWidth, window.innerHeight);
@@ -65,4 +78,18 @@
 	});
 </script>
 
-<div class="h-screen w-screen bg-black" id="three" bind:this={threeContainer}></div>
+<div class="relative h-screen w-screen bg-black" id="three" bind:this={threeContainer}>
+	<canvas class="pointer-events-none absolute h-0 w-0"></canvas>
+	<div class="absolute left-0 top-0 z-10 h-full w-full p-8">
+		<button onclick={fullscreen}>
+			<Fullscreen width="24" height="24" stroke="white"></Fullscreen>
+		</button>
+	</div>
+</div>
+
+<style>
+	#three > canvas {
+		z-index: 0;
+		outline: none;
+	}
+</style>
