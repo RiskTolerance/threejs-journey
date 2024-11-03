@@ -41,14 +41,25 @@
 		const group = new THREE.Group();
 		group.position.set(0, 0, 0);
 
-		const cube1 = createCube(1, 1, 1, 'red');
+		// triangle buffer geometry
+		const triGeometry = new THREE.BufferGeometry();
+		const positions32 = new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 0]);
+		const positionsBuffersAttr = new THREE.BufferAttribute(positions32, 3);
+		triGeometry.setAttribute('position', positionsBuffersAttr);
+		const material = new THREE.MeshBasicMaterial({
+			color: 0xff0000,
+			wireframe: true
+		});
+
+		const triMesh = new THREE.Mesh(triGeometry, material);
+		scene.add(triMesh);
 		const cube2 = createCube(1, 1, 1, 'green');
 		const cube3 = createCube(1, 1, 1, 'blue');
 
 		cube2.position.x = 3;
 		cube3.position.x = -3;
 
-		group.add(cube1, cube2, cube3);
+		group.add(triMesh, cube2, cube3);
 		scene.add(group);
 
 		gsap.to(group.position, { x: 4, duration: 2, delay: 2 }).then(() => {
