@@ -9,6 +9,7 @@
 	} from '$lib/threeHelpers';
 	import * as THREE from 'three';
 	import gsap from 'gsap';
+	import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 	let threeContainer: HTMLElement | null = null;
 
@@ -17,6 +18,9 @@
 		const camera = createCamera(1, 2, 5);
 		const renderer = createRenderer();
 		const axisHelper = createAxisHelper(scene);
+
+		const controls = new OrbitControls(camera, threeContainer);
+		controls.enableDamping = true;
 
 		if (threeContainer) {
 			threeContainer.appendChild(renderer.domElement);
@@ -40,9 +44,9 @@
 		});
 
 		function animate() {
-			group.rotation.z += 0.01;
+			// group.rotation.z += 0.01;
 			renderer.render(scene, camera);
-			camera.lookAt(group.position);
+			controls.update();
 		}
 
 		renderer.setAnimationLoop(animate);
