@@ -8,6 +8,7 @@
 		createAxisHelper
 	} from '$lib/threeHelpers';
 	import * as THREE from 'three';
+	import gsap from 'gsap';
 
 	let threeContainer: HTMLElement | null = null;
 
@@ -24,23 +25,28 @@
 		const group = new THREE.Group();
 		group.position.set(0, 0, 0);
 
-		const cube = createCube(1, 1, 1, 'red');
+		const cube1 = createCube(1, 1, 1, 'red');
 		const cube2 = createCube(1, 1, 1, 'green');
 		const cube3 = createCube(1, 1, 1, 'blue');
 
 		cube2.position.x = 3;
 		cube3.position.x = -3;
 
-		group.add(cube, cube2, cube3);
+		group.add(cube1, cube2, cube3);
 		scene.add(group);
+
+		gsap.to(group.position, { x: 4, duration: 2, delay: 2 }).then(() => {
+			gsap.to(group.position, { x: -4, duration: 2, delay: 2 });
+		});
 
 		function animate() {
 			group.rotation.z += 0.01;
 			renderer.render(scene, camera);
+			camera.lookAt(group.position);
 		}
 
 		renderer.setAnimationLoop(animate);
-		camera.lookAt(cube.position);
+
 		const onResize = () => {
 			camera.aspect = window.innerWidth / window.innerHeight;
 			camera.updateProjectionMatrix();
