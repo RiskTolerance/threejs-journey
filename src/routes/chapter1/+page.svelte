@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { createScene, createCamera, createRenderer, createCube } from './threeHelpers';
+	import { createScene, createCamera, createRenderer, createCube } from '$lib/threeHelpers';
 	import * as THREE from 'three';
 
 	let threeContainer: HTMLElement | null = null;
