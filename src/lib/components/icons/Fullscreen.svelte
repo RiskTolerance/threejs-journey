@@ -1,9 +1,9 @@
 <script lang="ts">
-	interface Props {
-		width: number;
-		height: number;
+	type Props = {
+		width: string;
+		height: string;
 		stroke: string;
-	}
+	};
 	let { width, height, stroke }: Props = $props();
 </script>
 
