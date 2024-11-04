@@ -11,6 +11,9 @@
 	import gsap from 'gsap';
 	import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 	import Fullscreen from '$lib/components/icons/Fullscreen.svelte';
+	import GUI from 'lil-gui';
+
+	const gui = new GUI();
 
 	let threeContainer: HTMLElement | null = null;
 
