@@ -47,3 +47,15 @@ export function createTorus(
 	const torus = new THREE.Mesh(geometry, surface);
 	return torus;
 }
+
+export function createPlane(
+	width: number,
+	height: number,
+	color?: THREE.ColorRepresentation,
+	material?: THREE.Material
+) {
+	const geometry = new THREE.PlaneGeometry(width, height);
+	const surface = material ? material : new THREE.MeshBasicMaterial({ color });
+	const plane = new THREE.Mesh(geometry, surface);
+	return plane;
+}

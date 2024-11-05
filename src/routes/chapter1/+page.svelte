@@ -8,13 +8,40 @@
 		createAxisHelper
 	} from '$lib/ threeHelpers/general';
 	// TODO: add more geometry creation scripts
-	import { createCone, createCube, createSphere, createTorus } from '$lib/ threeHelpers/geometry';
+	import {
+		createCone,
+		createCube,
+		createPlane,
+		createSphere,
+		createTorus
+	} from '$lib/ threeHelpers/geometry';
 	import { setBasicDebug } from '$lib/ threeHelpers/guis';
-	import gsap from 'gsap';
 	import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 	import Fullscreen from '$lib/components/icons/Fullscreen.svelte';
 	import GUI from 'lil-gui';
 
+	// import door images
+	import doorColorImage from '$lib/assets/textures/door/color.jpg';
+	import doorAlphaImage from '$lib/assets/textures/door/alpha.jpg';
+	import doorAOImage from '$lib/assets/textures/door/ambientOcclusion.jpg';
+	import doorHeightImage from '$lib/assets/textures/door/height.jpg';
+	import doorMetalnessImage from '$lib/assets/textures/door/metalness.jpg';
+	import doorNormalImage from '$lib/assets/textures/door/normal.jpg';
+	import doorRoughnessImage from '$lib/assets/textures/door/roughness.jpg';
+	import matcapImage from '$lib/assets/textures/matcaps/1.png';
+	import gradiantImage from '$lib/assets/textures/gradients/3.jpg';
+	// assign door textures ---------------------------------------------
+	const textureLoader = new THREE.TextureLoader();
+	const doorColor = textureLoader.load(doorColorImage);
+	const doorAlpha = textureLoader.load(doorAlphaImage);
+	const doorAO = textureLoader.load(doorAOImage);
+	const doorHeight = textureLoader.load(doorHeightImage);
+	const doorMetalness = textureLoader.load(doorMetalnessImage);
+	const doorNormal = textureLoader.load(doorNormalImage);
+	const doorRoughness = textureLoader.load(doorRoughnessImage);
+	const matcap = textureLoader.load(matcapImage);
+	const gradiant = textureLoader.load(gradiantImage);
+	// --------------------------------------------------------------------
 	type UI = {
 		fullscreen: () => void;
 	};
@@ -55,13 +82,15 @@
 		const group = new THREE.Group();
 		group.position.set(0, 0, 0);
 
+		const plane1 = createPlane(1, 1, 'green');
+		plane1.material.side = THREE.DoubleSide;
 		const sphere1 = createSphere(0.75, 'yellow');
 		const cube2 = createCube(1, 1, 1, 'red');
 		const cube3 = createCube(1, 1, 1, 'blue');
 		const cone1 = createCone(0.5, 1, 'pink');
-		const torus1 = createTorus(2, 0.5, 'blue');
+		const torus1 = createTorus(1, 0.2, 'white');
 
-		sphere1.position.x = 0;
+		sphere1.position.z = -3;
 		cube2.position.x = 3;
 		cube3.position.x = -3;
 		cone1.position.z = 3;
@@ -81,16 +110,17 @@
 		setBasicDebug(sphere1, 12, sphere1Tweaks);
 		const cone1Tweaks = gui.addFolder('Cone 1');
 		setBasicDebug(cone1, 12, cone1Tweaks);
-		group.add(sphere1, cube2, cube3, cone1, torus1);
+		group.add(plane1, sphere1, cube2, cube3, cone1, torus1);
 		scene.add(group);
-
-		gsap.to(group.position, { x: 4, duration: 2, delay: 2 }).then(() => {
-			gsap.to(group.position, { x: -4, duration: 2, delay: 2 });
-		});
 
 		function animate() {
 			renderer.render(scene, camera);
 			controls.update();
+			torus1.rotateX(0.01);
+			cube2.rotateZ(-0.01);
+			cube3.rotateZ(0.01);
+			cone1.rotateY(-0.01);
+			group.rotateY(0.001);
 		}
 		renderer.setAnimationLoop(animate);
 
