@@ -8,7 +8,7 @@
 		createAxisHelper
 	} from '$lib/ threeHelpers/general';
 	// TODO: add more geometry creation scripts
-	import { createCone, createCube, createSphere } from '$lib/ threeHelpers/geometry';
+	import { createCone, createCube, createSphere, createTorus } from '$lib/ threeHelpers/geometry';
 	import { setBasicDebug } from '$lib/ threeHelpers/guis';
 	import gsap from 'gsap';
 	import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -59,11 +59,13 @@
 		const cube2 = createCube(1, 1, 1, 'red');
 		const cube3 = createCube(1, 1, 1, 'blue');
 		const cone1 = createCone(0.5, 1, 'pink');
+		const torus1 = createTorus(2, 0.5, 'blue');
 
 		sphere1.position.x = 0;
 		cube2.position.x = 3;
 		cube3.position.x = -3;
 		cone1.position.z = 3;
+		torus1.position.z = -3;
 
 		// create the GUI,
 		const gui = new GUI({
@@ -79,7 +81,7 @@
 		setBasicDebug(sphere1, 12, sphere1Tweaks);
 		const cone1Tweaks = gui.addFolder('Cone 1');
 		setBasicDebug(cone1, 12, cone1Tweaks);
-		group.add(sphere1, cube2, cube3, cone1);
+		group.add(sphere1, cube2, cube3, cone1, torus1);
 		scene.add(group);
 
 		gsap.to(group.position, { x: 4, duration: 2, delay: 2 }).then(() => {
