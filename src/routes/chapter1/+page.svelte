@@ -17,6 +17,7 @@
 	} from '$lib/ threeHelpers/geometry';
 	import { setBasicDebug } from '$lib/ threeHelpers/guis';
 	import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+	import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 	import Fullscreen from '$lib/components/icons/Fullscreen.svelte';
 	import GUI from 'lil-gui';
 
@@ -30,18 +31,25 @@
 	import doorRoughnessImage from '$lib/assets/textures/door/roughness.jpg';
 	import matcapImage from '$lib/assets/textures/matcaps/1.png';
 	import gradiantImage from '$lib/assets/textures/gradients/3.jpg';
-	// assign door textures ---------------------------------------------
-	const textureLoader = new THREE.TextureLoader();
-	const doorColor = textureLoader.load(doorColorImage);
-	const doorAlpha = textureLoader.load(doorAlphaImage);
-	const doorAO = textureLoader.load(doorAOImage);
-	const doorHeight = textureLoader.load(doorHeightImage);
-	const doorMetalness = textureLoader.load(doorMetalnessImage);
-	const doorNormal = textureLoader.load(doorNormalImage);
-	const doorRoughness = textureLoader.load(doorRoughnessImage);
-	const matcap = textureLoader.load(matcapImage);
-	const gradiant = textureLoader.load(gradiantImage);
-	// --------------------------------------------------------------------
+	// environment maps
+	// import envMapStarter from '$lib/assets/textures/environmentMap/2k.hdr';
+	// matcaps
+	import matcap1 from '$lib/assets/textures/matcaps/1.png';
+	import matcap2 from '$lib/assets/textures/matcaps/2.png';
+	import matcap3 from '$lib/assets/textures/matcaps/3.png';
+	import matcap4 from '$lib/assets/textures/matcaps/4.png';
+	import matcap5 from '$lib/assets/textures/matcaps/5.png';
+	import matcap6 from '$lib/assets/textures/matcaps/6.png';
+	import matcap7 from '$lib/assets/textures/matcaps/7.png';
+	import matcap8 from '$lib/assets/textures/matcaps/8.png';
+	// gradiants
+	import gradient1 from '$lib/assets/textures/gradients/3.jpg';
+	import gradient2 from '$lib/assets/textures/gradients/5.jpg';
+	// other
+	import checkerboard8 from '$lib/assets/textures/checkerboard-8x8.png';
+	import checkerboard1024 from '$lib/assets/textures/checkerboard-1024x1024.png';
+	import diamondBlock from '$lib/assets/textures/minecraft.png';
+
 	type UI = {
 		fullscreen: () => void;
 	};
@@ -65,6 +73,25 @@
 		const controls = new OrbitControls(camera, threeContainer);
 		controls.enableDamping = true;
 
+		const textureLoader = new THREE.TextureLoader();
+		// assign door textures ---------------------------------------------
+		const doorColor = textureLoader.load(doorColorImage);
+		const doorAlpha = textureLoader.load(doorAlphaImage);
+		const doorAO = textureLoader.load(doorAOImage);
+		const doorHeight = textureLoader.load(doorHeightImage);
+		const doorMetalness = textureLoader.load(doorMetalnessImage);
+		const doorNormal = textureLoader.load(doorNormalImage);
+		const doorRoughness = textureLoader.load(doorRoughnessImage);
+		const matcap = textureLoader.load(matcapImage);
+		const gradiant = textureLoader.load(gradiantImage);
+		const diamondBlockColor = textureLoader.load(diamondBlock);
+		// set colorspace (for map and matcap) ------------------------------------------------------------------
+		doorColor.colorSpace = THREE.SRGBColorSpace;
+		matcap.colorSpace = THREE.SRGBColorSpace;
+		// set envMaps
+		const hdriLoader = new RGBELoader();
+		// hdriLoader.load(envMapStarter);
+
 		ui.fullscreen = () => {
 			if (threeContainer && !document.fullscreenElement) {
 				threeContainer.requestFullscreen();
@@ -82,10 +109,38 @@
 		const group = new THREE.Group();
 		group.position.set(0, 0, 0);
 
-		const plane1 = createPlane(1, 1, 'green');
-		plane1.material.side = THREE.DoubleSide;
+		// materials
+		const doorColorMat = new THREE.MeshStandardMaterial({ map: doorColor });
+		const plane1 = createPlane(1, 1, undefined, doorColorMat);
+		const p1m = plane1.material;
+		p1m.side = THREE.DoubleSide;
+		p1m.transparent = true;
+
+		if (p1m instanceof THREE.MeshStandardMaterial) {
+			p1m.alphaMap = doorAlpha;
+			p1m.aoMapIntensity = 1.5;
+			p1m.aoMap = doorAO;
+			p1m.normalScale = new THREE.Vector2(2, 2);
+			p1m.normalMap = doorNormal;
+			p1m.displacementScale = 0.03;
+			p1m.displacementMap = doorHeight;
+			p1m.metalness = 0.8;
+			p1m.metalnessMap = doorMetalness;
+			p1m.roughness = 1;
+			p1m.roughnessMap = doorRoughness;
+		}
+
+		diamondBlockColor.generateMipmaps = false;
+		diamondBlockColor.magFilter = THREE.NearestFilter;
+		const diamondBlockMat = new THREE.MeshStandardMaterial({ map: diamondBlockColor });
+		// diamondBlockMat.metalness = 2;
+		const cube2 = createCube(1, 1, 1, undefined, diamondBlockMat);
+		if (cube2.material instanceof THREE.MeshStandardMaterial) {
+			cube2.material.metalness = 0.5;
+			cube2.material.roughness = 0.1;
+		}
+
 		const sphere1 = createSphere(0.75, 'yellow');
-		const cube2 = createCube(1, 1, 1, 'red');
 		const cube3 = createCube(1, 1, 1, 'blue');
 		const cone1 = createCone(0.5, 1, 'pink');
 		const torus1 = createTorus(1, 0.2, 'white');
@@ -110,6 +165,16 @@
 		setBasicDebug(sphere1, 12, sphere1Tweaks);
 		const cone1Tweaks = gui.addFolder('Cone 1');
 		setBasicDebug(cone1, 12, cone1Tweaks);
+
+		// lights
+		const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+		scene.add(ambientLight);
+		const pointLight1 = new THREE.PointLight(0xffffff, 30);
+		pointLight1.position.x = 2;
+		pointLight1.position.y = 3;
+		pointLight1.position.z = 4;
+		scene.add(pointLight1);
+
 		group.add(plane1, sphere1, cube2, cube3, cone1, torus1);
 		scene.add(group);
 
@@ -120,7 +185,7 @@
 			cube2.rotateZ(-0.01);
 			cube3.rotateZ(0.01);
 			cone1.rotateY(-0.01);
-			group.rotateY(0.001);
+			// group.rotateY(0.001);
 		}
 		renderer.setAnimationLoop(animate);
 
