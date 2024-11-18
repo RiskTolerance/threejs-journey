@@ -15,9 +15,11 @@
 		createSphere,
 		createTorus
 	} from '$lib/ threeHelpers/geometry';
+
+	import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+
 	import { setBasicDebug } from '$lib/ threeHelpers/guis';
 	import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-	import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 	import Fullscreen from '$lib/components/icons/Fullscreen.svelte';
 	import GUI from 'lil-gui';
 
@@ -88,9 +90,6 @@
 		// set colorspace (for map and matcap) ------------------------------------------------------------------
 		doorColor.colorSpace = THREE.SRGBColorSpace;
 		matcap.colorSpace = THREE.SRGBColorSpace;
-		// set envMaps
-		const hdriLoader = new RGBELoader();
-		// hdriLoader.load(envMapStarter);
 
 		ui.fullscreen = () => {
 			if (threeContainer && !document.fullscreenElement) {
@@ -166,6 +165,13 @@
 		const cone1Tweaks = gui.addFolder('Cone 1');
 		setBasicDebug(cone1, 12, cone1Tweaks);
 
+		// environment
+		const rgbeLoader = new RGBELoader();
+		rgbeLoader.setPath('src/lib/assets/textures/environmentMap/').load('2k.hdr', (envMap) => {
+			envMap.mapping = THREE.EquirectangularRefractionMapping;
+			scene.background = envMap;
+			scene.environment = envMap;
+		});
 		// lights
 		const ambientLight = new THREE.AmbientLight(0xffffff, 1);
 		scene.add(ambientLight);
