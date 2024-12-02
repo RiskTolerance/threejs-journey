@@ -3,10 +3,25 @@ import * as THREE from 'three';
 type MaterialTypes =
 	| THREE.MeshBasicMaterial
 	| THREE.MeshStandardMaterial
-	| THREE.MeshStandardMaterial
+	| THREE.MeshNormalMaterial
 	| THREE.MeshMatcapMaterial
 	| THREE.MeshLambertMaterial
 	| THREE.MeshPhongMaterial;
+
+function isColorableMaterial(
+	material: MaterialTypes
+): material is
+	| THREE.MeshBasicMaterial
+	| THREE.MeshLambertMaterial
+	| THREE.MeshPhongMaterial
+	| THREE.MeshMatcapMaterial {
+	return (
+		material instanceof THREE.MeshBasicMaterial ||
+		material instanceof THREE.MeshLambertMaterial ||
+		material instanceof THREE.MeshPhongMaterial ||
+		material instanceof THREE.MeshMatcapMaterial
+	);
+}
 
 export function createCube(
 	x: number,
@@ -16,11 +31,10 @@ export function createCube(
 	material?: MaterialTypes
 ): THREE.Mesh {
 	const geometry = new THREE.BoxGeometry(x, y, z);
-	const surface: MaterialTypes = material ? material : new THREE.MeshBasicMaterial({ color });
-	// the MeshStandardMaterial doesn't have the color property, so we need to be sure that surface is using MeshBasicMaterial before applying a color
-	if (color && material && !(surface instanceof THREE.MeshStandardMaterial)) {
-		surface.color = new THREE.Color(color);
+	if (color && material && isColorableMaterial(material)) {
+		material.color = new THREE.Color(color);
 	}
+	const surface: MaterialTypes = material || new THREE.MeshBasicMaterial({ color });
 
 	const cube = new THREE.Mesh(geometry, surface);
 	return cube;
@@ -32,10 +46,10 @@ export function createSphere(
 	material?: MaterialTypes
 ): THREE.Mesh {
 	const geometry = new THREE.SphereGeometry(radius);
-	const surface: MaterialTypes = material ? material : new THREE.MeshBasicMaterial({ color });
-	if (color && material && !(surface instanceof THREE.MeshStandardMaterial)) {
-		surface.color = new THREE.Color(color);
+	if (color && material && isColorableMaterial(material)) {
+		material.color = new THREE.Color(color);
 	}
+	const surface: MaterialTypes = material || new THREE.MeshBasicMaterial({ color });
 	const sphere = new THREE.Mesh(geometry, surface);
 	return sphere;
 }
@@ -47,10 +61,10 @@ export function createCone(
 	material?: MaterialTypes
 ): THREE.Mesh {
 	const geometry = new THREE.ConeGeometry(radius, height);
-	const surface: MaterialTypes = material ? material : new THREE.MeshBasicMaterial({ color });
-	if (color && material && !(surface instanceof THREE.MeshStandardMaterial)) {
-		surface.color = new THREE.Color(color);
+	if (color && material && isColorableMaterial(material)) {
+		material.color = new THREE.Color(color);
 	}
+	const surface: MaterialTypes = material || new THREE.MeshBasicMaterial({ color });
 	const cone = new THREE.Mesh(geometry, surface);
 	return cone;
 }
@@ -62,11 +76,10 @@ export function createTorus(
 	material?: MaterialTypes
 ): THREE.Mesh {
 	const geometry = new THREE.TorusGeometry(radius, tubeRadius);
-	const surface: MaterialTypes = material ? material : new THREE.MeshBasicMaterial({ color });
-	if (color && material && !(surface instanceof THREE.MeshStandardMaterial)) {
-		surface.color = new THREE.Color(color);
+	if (color && material && isColorableMaterial(material)) {
+		material.color = new THREE.Color(color);
 	}
-
+	const surface: MaterialTypes = material || new THREE.MeshBasicMaterial({ color });
 	const torus = new THREE.Mesh(geometry, surface);
 	return torus;
 }
@@ -78,10 +91,10 @@ export function createPlane(
 	material?: MaterialTypes
 ) {
 	const geometry = new THREE.PlaneGeometry(width, height, 80, 80);
-	const surface: MaterialTypes = material ? material : new THREE.MeshBasicMaterial({ color });
-	if (color && material && surface instanceof THREE.MeshStandardMaterial) {
-		surface.color = new THREE.Color(color);
+	if (color && material && isColorableMaterial(material)) {
+		material.color = new THREE.Color(color);
 	}
+	const surface: MaterialTypes = material || new THREE.MeshBasicMaterial({ color });
 	const plane = new THREE.Mesh(geometry, surface);
 	return plane;
 }

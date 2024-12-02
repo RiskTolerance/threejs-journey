@@ -7,6 +7,7 @@
 		createRenderer,
 		createAxisHelper
 	} from '$lib/ threeHelpers/general';
+
 	// TODO: add more geometry creation scripts
 	import {
 		createCone,
@@ -31,8 +32,6 @@
 	import doorMetalnessImage from '$textures/door/metalness.jpg';
 	import doorNormalImage from '$textures/door/normal.jpg';
 	import doorRoughnessImage from '$textures/door/roughness.jpg';
-	import matcapImage from '$textures/matcaps/1.png';
-	import gradiantImage from '$textures/gradients/3.jpg';
 	// env maps
 
 	import environment from '$textures/environmentMap/2k.hdr';
@@ -46,13 +45,12 @@
 	import matcap7 from '$textures/matcaps/7.png';
 	import matcap8 from '$textures/matcaps/8.png';
 	// gradiants
-	import gradient1 from '$textures/gradients/3.jpg';
-	import gradient2 from '$textures/gradients/5.jpg';
+	import gradient3 from '$textures/gradients/3.jpg';
+	import gradient5 from '$textures/gradients/5.jpg';
 	// other
 	import checkerboard8 from '$textures/checkerboard-8x8.png';
 	import checkerboard1024 from '$textures/checkerboard-1024x1024.png';
 	import diamondBlock from '$textures/minecraft.png';
-	import type { MaskPass } from 'three/examples/jsm/Addons.js';
 
 	type UI = {
 		fullscreen: () => void;
@@ -86,10 +84,12 @@
 		const doorMetalness = textureLoader.load(doorMetalnessImage);
 		const doorNormal = textureLoader.load(doorNormalImage);
 		const doorRoughness = textureLoader.load(doorRoughnessImage);
-		const matcap = textureLoader.load(matcapImage);
-		const gradiant = textureLoader.load(gradiantImage);
+
+		const matcap = textureLoader.load(matcap1);
+		const gradiant = textureLoader.load(gradient3);
+
 		const diamondBlockColor = textureLoader.load(diamondBlock);
-		// set colorspace (for map and matcap) ------------------------------------------------------------------
+		// set colorspace (for map and matcap) ------------------------------
 		doorColor.colorSpace = THREE.SRGBColorSpace;
 		matcap.colorSpace = THREE.SRGBColorSpace;
 
@@ -110,7 +110,7 @@
 		const group = new THREE.Group();
 		group.position.set(0, 0, 0);
 
-		// materials
+		// door material setup
 		const doorColorMat = new THREE.MeshStandardMaterial({ map: doorColor });
 		const plane1 = createPlane(1, 1, undefined, doorColorMat);
 		const p1m = plane1.material;
@@ -131,19 +131,32 @@
 			p1m.roughnessMap = doorRoughness;
 		}
 
+		// diamond block material
 		diamondBlockColor.generateMipmaps = false;
 		diamondBlockColor.magFilter = THREE.NearestFilter;
 		const diamondBlockMat = new THREE.MeshStandardMaterial({ map: diamondBlockColor });
-		// diamondBlockMat.metalness = 2;
+		diamondBlockMat.metalness = 2;
 		const cube2 = createCube(1, 1, 1, undefined, diamondBlockMat);
 		if (cube2.material instanceof THREE.MeshStandardMaterial) {
 			cube2.material.metalness = 0.5;
 			cube2.material.roughness = 0.1;
 		}
 
-		const sphere1 = createSphere(0.75, 'yellow');
+		// standard material
+		const genericBasicMat = new THREE.MeshBasicMaterial({
+			map: gradiant,
+			color: 'green',
+			wireframe: false,
+			transparent: true,
+			opacity: 0.5
+		});
+
+		// mesh normal material
+		const genericMeshNormalMat = new THREE.MeshNormalMaterial();
+
+		const cone1 = createCone(0.5, 1, undefined, genericBasicMat);
+		const sphere1 = createSphere(0.75, undefined, genericMeshNormalMat);
 		const cube3 = createCube(1, 1, 1, 'blue');
-		const cone1 = createCone(0.5, 1, 'pink');
 		const torus1 = createTorus(1, 0.2, 'white');
 
 		sphere1.position.z = -3;
@@ -183,6 +196,7 @@
 		pointLight1.position.z = 4;
 		scene.add(pointLight1);
 
+		// add objects to scene -----------------------------------------
 		group.add(plane1, sphere1, cube2, cube3, cone1, torus1);
 		scene.add(group);
 
