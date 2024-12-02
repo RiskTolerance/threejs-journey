@@ -24,33 +24,35 @@
 	import GUI from 'lil-gui';
 
 	// import door images
-	import doorColorImage from '$lib/assets/textures/door/color.jpg';
-	import doorAlphaImage from '$lib/assets/textures/door/alpha.jpg';
-	import doorAOImage from '$lib/assets/textures/door/ambientOcclusion.jpg';
-	import doorHeightImage from '$lib/assets/textures/door/height.jpg';
-	import doorMetalnessImage from '$lib/assets/textures/door/metalness.jpg';
-	import doorNormalImage from '$lib/assets/textures/door/normal.jpg';
-	import doorRoughnessImage from '$lib/assets/textures/door/roughness.jpg';
-	import matcapImage from '$lib/assets/textures/matcaps/1.png';
-	import gradiantImage from '$lib/assets/textures/gradients/3.jpg';
-	// environment maps
-	// import envMapStarter from '$lib/assets/textures/environmentMap/2k.hdr';
+	import doorColorImage from '$textures/door/color.jpg';
+	import doorAlphaImage from '$textures/door/alpha.jpg';
+	import doorAOImage from '$textures/door/ambientOcclusion.jpg';
+	import doorHeightImage from '$textures/door/height.jpg';
+	import doorMetalnessImage from '$textures/door/metalness.jpg';
+	import doorNormalImage from '$textures/door/normal.jpg';
+	import doorRoughnessImage from '$textures/door/roughness.jpg';
+	import matcapImage from '$textures/matcaps/1.png';
+	import gradiantImage from '$textures/gradients/3.jpg';
+	// env maps
+
+	import environment from '$textures/environmentMap/2k.hdr';
 	// matcaps
-	import matcap1 from '$lib/assets/textures/matcaps/1.png';
-	import matcap2 from '$lib/assets/textures/matcaps/2.png';
-	import matcap3 from '$lib/assets/textures/matcaps/3.png';
-	import matcap4 from '$lib/assets/textures/matcaps/4.png';
-	import matcap5 from '$lib/assets/textures/matcaps/5.png';
-	import matcap6 from '$lib/assets/textures/matcaps/6.png';
-	import matcap7 from '$lib/assets/textures/matcaps/7.png';
-	import matcap8 from '$lib/assets/textures/matcaps/8.png';
+	import matcap1 from '$textures/matcaps/1.png';
+	import matcap2 from '$textures/matcaps/2.png';
+	import matcap3 from '$textures/matcaps/3.png';
+	import matcap4 from '$textures/matcaps/4.png';
+	import matcap5 from '$textures/matcaps/5.png';
+	import matcap6 from '$textures/matcaps/6.png';
+	import matcap7 from '$textures/matcaps/7.png';
+	import matcap8 from '$textures/matcaps/8.png';
 	// gradiants
-	import gradient1 from '$lib/assets/textures/gradients/3.jpg';
-	import gradient2 from '$lib/assets/textures/gradients/5.jpg';
+	import gradient1 from '$textures/gradients/3.jpg';
+	import gradient2 from '$textures/gradients/5.jpg';
 	// other
-	import checkerboard8 from '$lib/assets/textures/checkerboard-8x8.png';
-	import checkerboard1024 from '$lib/assets/textures/checkerboard-1024x1024.png';
-	import diamondBlock from '$lib/assets/textures/minecraft.png';
+	import checkerboard8 from '$textures/checkerboard-8x8.png';
+	import checkerboard1024 from '$textures/checkerboard-1024x1024.png';
+	import diamondBlock from '$textures/minecraft.png';
+	import type { MaskPass } from 'three/examples/jsm/Addons.js';
 
 	type UI = {
 		fullscreen: () => void;
@@ -167,7 +169,7 @@
 
 		// environment
 		const rgbeLoader = new RGBELoader();
-		rgbeLoader.setPath('src/lib/assets/textures/environmentMap/').load('2k.hdr', (envMap) => {
+		rgbeLoader.load(environment, (envMap) => {
 			envMap.mapping = THREE.EquirectangularRefractionMapping;
 			scene.background = envMap;
 			scene.environment = envMap;
@@ -212,7 +214,7 @@
 
 <svelte:window {onkeydown} />
 
-<div class="relative h-screen w-screen bg-black" id="three" bind:this={threeContainer}>
+<div class="relative h-screen w-full bg-black" id="three" bind:this={threeContainer}>
 	<canvas class="pointer-events-none absolute h-0 w-0"></canvas>
 	<div class="pointer-events-none absolute left-0 top-0 z-10 h-full w-full p-8">
 		<button class="pointer-events-auto" onclick={ui.fullscreen}>
