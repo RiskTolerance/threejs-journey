@@ -10,11 +10,13 @@
 
 	// TODO: add more geometry creation scripts
 	import {
+		createCapsule,
 		createCone,
 		createCube,
 		createPlane,
 		createSphere,
-		createTorus
+		createTorus,
+		createTorusKnot
 	} from '$lib/ threeHelpers/geometry';
 
 	import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
@@ -85,7 +87,7 @@
 		const doorNormal = textureLoader.load(doorNormalImage);
 		const doorRoughness = textureLoader.load(doorRoughnessImage);
 
-		const matcap = textureLoader.load(matcap1);
+		const matcap = textureLoader.load(matcap3);
 		const gradiant = textureLoader.load(gradient3);
 
 		const diamondBlockColor = textureLoader.load(diamondBlock);
@@ -144,21 +146,49 @@
 
 		// standard material
 		const genericBasicMat = new THREE.MeshBasicMaterial({
-			map: gradiant,
 			color: 'green',
 			wireframe: false,
-			transparent: true,
-			opacity: 0.5
+			transparent: false,
+			opacity: 1
 		});
 
 		// mesh normal material
 		const genericMeshNormalMat = new THREE.MeshNormalMaterial();
 
+		// mesh matcap material
+		const genericMeshMatcapMat = new THREE.MeshMatcapMaterial({
+			matcap: matcap,
+			opacity: 0.5,
+			transparent: true
+		});
+
+		// mesh phong material
+		const genericMeshPhongMaterial = new THREE.MeshPhongMaterial({
+			color: 'blue',
+			shininess: 50,
+			specular: new THREE.Color(0x188ff)
+		});
+
+		// mesh lambert material
+		const genericMeshLambertMat = new THREE.MeshLambertMaterial();
+
+		// mesh toon material
+		gradiant.minFilter = THREE.NearestFilter;
+		gradiant.magFilter = THREE.NearestFilter;
+		const genericToonMaterial = new THREE.MeshToonMaterial({
+			gradientMap: gradiant
+		});
+
 		const cone1 = createCone(0.5, 1, undefined, genericBasicMat);
 		const sphere1 = createSphere(0.75, undefined, genericMeshNormalMat);
-		const cube3 = createCube(1, 1, 1, 'blue');
-		const torus1 = createTorus(1, 0.2, 'white');
+		const cube3 = createCube(1, 1, 1, 'pink', genericMeshLambertMat);
+		const torus1 = createTorus(1, 0.2, undefined, genericMeshMatcapMat);
+		const torusKnot = createTorusKnot(0.4, 0.13, undefined, genericMeshPhongMaterial);
+		const pill = createCapsule(0.25, 0.5, 'yellow', genericToonMaterial);
 
+		pill.position.y = -2.5;
+		pill.rotateX(0.9);
+		torusKnot.position.y = 2.5;
 		sphere1.position.z = -3;
 		cube2.position.x = 3;
 		cube3.position.x = -3;
@@ -190,23 +220,28 @@
 		// lights
 		const ambientLight = new THREE.AmbientLight(0xffffff, 1);
 		scene.add(ambientLight);
-		const pointLight1 = new THREE.PointLight(0xffffff, 30);
+		const pointLight1 = new THREE.PointLight(0xffffff, 100);
 		pointLight1.position.x = 2;
 		pointLight1.position.y = 3;
 		pointLight1.position.z = 4;
 		scene.add(pointLight1);
 
 		// add objects to scene -----------------------------------------
-		group.add(plane1, sphere1, cube2, cube3, cone1, torus1);
+		group.add(plane1, sphere1, cube2, cube3, cone1, torus1, torusKnot, pill);
 		scene.add(group);
 
 		function animate() {
 			renderer.render(scene, camera);
 			controls.update();
-			torus1.rotateX(0.01);
-			cube2.rotateZ(-0.01);
-			cube3.rotateZ(0.01);
-			cone1.rotateY(-0.01);
+			torus1.rotateX(0.005);
+			torus1.rotateZ(0.0055);
+			torus1.rotateX(0.0025);
+			cube2.rotateZ(-0.005);
+			cube3.rotateZ(0.005);
+			cube3.rotateY(0.0025);
+			cone1.rotateY(-0.005);
+			pill.rotateY(0.005);
+			pill.rotateX(0.004);
 			// group.rotateY(0.001);
 		}
 		renderer.setAnimationLoop(animate);

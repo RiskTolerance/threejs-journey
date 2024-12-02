@@ -6,7 +6,8 @@ type MaterialTypes =
 	| THREE.MeshNormalMaterial
 	| THREE.MeshMatcapMaterial
 	| THREE.MeshLambertMaterial
-	| THREE.MeshPhongMaterial;
+	| THREE.MeshPhongMaterial
+	| THREE.MeshToonMaterial;
 
 function isColorableMaterial(
 	material: MaterialTypes
@@ -14,12 +15,14 @@ function isColorableMaterial(
 	| THREE.MeshBasicMaterial
 	| THREE.MeshLambertMaterial
 	| THREE.MeshPhongMaterial
-	| THREE.MeshMatcapMaterial {
+	| THREE.MeshMatcapMaterial
+	| THREE.MeshToonMaterial {
 	return (
 		material instanceof THREE.MeshBasicMaterial ||
 		material instanceof THREE.MeshLambertMaterial ||
 		material instanceof THREE.MeshPhongMaterial ||
-		material instanceof THREE.MeshMatcapMaterial
+		material instanceof THREE.MeshMatcapMaterial ||
+		material instanceof THREE.MeshToonMaterial
 	);
 }
 
@@ -97,4 +100,34 @@ export function createPlane(
 	const surface: MaterialTypes = material || new THREE.MeshBasicMaterial({ color });
 	const plane = new THREE.Mesh(geometry, surface);
 	return plane;
+}
+
+export function createTorusKnot(
+	radius?: number,
+	tubeRadius?: number,
+	color?: THREE.ColorRepresentation,
+	material?: MaterialTypes
+) {
+	const geometry = new THREE.TorusKnotGeometry(radius ?? 1, tubeRadius ?? 0.4);
+	if (color && material && isColorableMaterial(material)) {
+		material.color = new THREE.Color(color);
+	}
+	const surface: MaterialTypes = material || new THREE.MeshBasicMaterial({ color });
+	const torusKnot = new THREE.Mesh(geometry, surface);
+	return torusKnot;
+}
+
+export function createCapsule(
+	radius: number,
+	length: number,
+	color?: THREE.ColorRepresentation,
+	material?: MaterialTypes
+) {
+	const geometry = new THREE.CapsuleGeometry(radius, length);
+	if (color && material && isColorableMaterial(material)) {
+		material.color = new THREE.Color(color);
+	}
+	const surface: MaterialTypes = material || new THREE.MeshBasicMaterial({ color });
+	const mesh = new THREE.Mesh(geometry, surface);
+	return mesh;
 }
