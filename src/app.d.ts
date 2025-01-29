@@ -7,6 +7,15 @@ declare global {
 		// interface PageData {}
 		// interface PageState {}
 		// interface Platform {}
+		declare module '*.hdr' {
+			const value: string;
+			export default value;
+		}
+		declare module '*.json' {
+			import { FontData } from 'three/examples/jsm/Addons.js';
+			const value: FontData;
+			export default value;
+		}
 	}
 }
 

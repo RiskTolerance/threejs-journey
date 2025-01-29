@@ -9,3 +9,7 @@
 // });
 // const triMesh = new THREE.Mesh(triGeometry, material);
 // scene.add(triMesh);
+
+// gsap.to(group.position, { x: 4, duration: 2, delay: 2 }).then(() => {
+		// 	gsap.to(group.position, { x: -4, duration: 2, delay: 2 });
+		// });
