@@ -11,6 +11,11 @@ declare global {
 			const value: string;
 			export default value;
 		}
+		declare module '*.json' {
+			import { FontData } from 'three/examples/jsm/Addons.js';
+			const value: FontData;
+			export default value;
+		}
 	}
 }
 

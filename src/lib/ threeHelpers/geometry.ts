@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+import type { Font } from 'three/examples/jsm/Addons.js';
 
 type MaterialTypes =
 	| THREE.MeshBasicMaterial
@@ -129,5 +131,26 @@ export function createCapsule(
 	}
 	const surface: MaterialTypes = material || new THREE.MeshBasicMaterial({ color });
 	const mesh = new THREE.Mesh(geometry, surface);
+	return mesh;
+}
+
+export function createTextMesh(
+	font: Font,
+	color?: THREE.ColorRepresentation,
+	material?: MaterialTypes
+) {
+	const textGeometry = new TextGeometry('sup', {
+		font: font,
+		size: 0.8,
+		depth: 0.2,
+		curveSegments: 0,
+		bevelEnabled: false,
+		bevelThickness: 0.3,
+		bevelSize: 0.02,
+		bevelOffset: 0,
+		bevelSegments: 5
+	});
+	const surface: MaterialTypes = material || new THREE.MeshBasicMaterial({ color });
+	const mesh = new THREE.Mesh(textGeometry, surface);
 	return mesh;
 }

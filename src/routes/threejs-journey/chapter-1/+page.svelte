@@ -8,6 +8,10 @@
 		createAxisHelper
 	} from '$lib/ threeHelpers/general';
 
+	// fonts
+	import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+	// text geometry
+
 	// TODO: add more geometry creation scripts
 	import {
 		createCapsule,
@@ -16,7 +20,8 @@
 		createPlane,
 		createSphere,
 		createTorus,
-		createTorusKnot
+		createTorusKnot,
+		createTextMesh
 	} from '$lib/ threeHelpers/geometry';
 
 	import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
@@ -36,7 +41,10 @@
 	import doorRoughnessImage from '$textures/door/roughness.jpg';
 	// env maps
 
-	import environment from '$textures/environmentMap/2k.hdr';
+	// Font
+	import fontData from '$lib/assets/fonts/Geo_Regular.json';
+
+	import environment from '$textures/environmentMap/4k.hdr';
 	// matcaps
 	import matcap1 from '$textures/matcaps/1.png';
 	import matcap2 from '$textures/matcaps/2.png';
@@ -91,6 +99,11 @@
 		const gradiant = textureLoader.load(gradient3);
 
 		const diamondBlockColor = textureLoader.load(diamondBlock);
+
+		// load fonts
+		const fontLoader = new FontLoader();
+		const projectFont = fontLoader.parse(fontData);
+
 		// set colorspace (for map and matcap) ------------------------------
 		doorColor.colorSpace = THREE.SRGBColorSpace;
 		matcap.colorSpace = THREE.SRGBColorSpace;
@@ -185,6 +198,7 @@
 		const torus1 = createTorus(1, 0.2, undefined, genericMeshMatcapMat);
 		const torusKnot = createTorusKnot(0.4, 0.13, undefined, genericMeshPhongMaterial);
 		const pill = createCapsule(0.25, 0.5, 'yellow', genericToonMaterial);
+		const text = createTextMesh(projectFont, undefined, genericMeshNormalMat);
 
 		pill.position.y = -2.5;
 		pill.rotateX(0.9);
@@ -194,6 +208,9 @@
 		cube3.position.x = -3;
 		cone1.position.z = 3;
 		torus1.position.z = -3;
+
+		text.position.x = 4;
+		text.position.z = 4;
 
 		// create the GUI,
 		const gui = new GUI({
@@ -210,7 +227,7 @@
 		const cone1Tweaks = gui.addFolder('Cone 1');
 		setBasicDebug(cone1, 12, cone1Tweaks);
 
-		// environment
+		// environment + HDR
 		const rgbeLoader = new RGBELoader();
 		rgbeLoader.load(environment, (envMap) => {
 			envMap.mapping = THREE.EquirectangularRefractionMapping;
@@ -218,16 +235,14 @@
 			scene.environment = envMap;
 		});
 		// lights
-		const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+		const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
 		scene.add(ambientLight);
 		const pointLight1 = new THREE.PointLight(0xffffff, 100);
-		pointLight1.position.x = 2;
-		pointLight1.position.y = 3;
-		pointLight1.position.z = 4;
+		pointLight1.position.x = 4;
 		scene.add(pointLight1);
 
 		// add objects to scene -----------------------------------------
-		group.add(plane1, sphere1, cube2, cube3, cone1, torus1, torusKnot, pill);
+		group.add(plane1, sphere1, cube2, cube3, cone1, torus1, torusKnot, pill, text);
 		scene.add(group);
 
 		function animate() {
