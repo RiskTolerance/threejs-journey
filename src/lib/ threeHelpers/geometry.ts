@@ -135,11 +135,12 @@ export function createCapsule(
 }
 
 export function createTextMesh(
+	text: string,
 	font: Font,
 	color?: THREE.ColorRepresentation,
 	material?: MaterialTypes
 ) {
-	const textGeometry = new TextGeometry('sup', {
+	const textGeometry = new TextGeometry(text, {
 		font: font,
 		size: 0.8,
 		depth: 0.2,
