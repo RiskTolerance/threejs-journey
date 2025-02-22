@@ -6,11 +6,12 @@
 		createCamera,
 		createRenderer,
 		createAxisHelper
-	} from '$lib/ threeHelpers/general';
+	} from '$lib/threeHelpers/general';
+
+	let threeContainer: HTMLElement | null = null;
 
 	// fonts
 	import { FontLoader } from 'three/addons/loaders/FontLoader.js';
-	// text geometry
 
 	// TODO: add more geometry creation scripts
 	import {
@@ -22,11 +23,11 @@
 		createTorus,
 		createTorusKnot,
 		createTextMesh
-	} from '$lib/ threeHelpers/geometry';
+	} from '$lib/threeHelpers/geometry';
 
 	import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 
-	import { setBasicDebug } from '$lib/ threeHelpers/guis';
+	import { setBasicDebug } from '$lib/threeHelpers/guis';
 	import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 	import Fullscreen from '$lib/components/icons/Fullscreen.svelte';
 	import GUI from 'lil-gui';
@@ -42,7 +43,9 @@
 	// env maps
 
 	// Font
-	import fontData from '$lib/assets/fonts/Geo_Regular.json';
+	import fontGeo from '$lib/assets/fonts/Geo_Regular.json';
+	import fontBumb from '$lib/assets/fonts/Bumbdesc_Regular.json';
+	import fontVirt from '$lib/assets/fonts/VirtupetPixies_Medium.json';
 
 	import environment from '$textures/environmentMap/4k.hdr';
 	// matcaps
@@ -69,8 +72,6 @@
 	const ui: UI = $state({
 		fullscreen: () => {}
 	});
-
-	let threeContainer: HTMLElement | null = null;
 
 	const onkeydown = (e: KeyboardEvent) => {
 		console.log(e, e.key);
@@ -102,7 +103,7 @@
 
 		// load fonts
 		const fontLoader = new FontLoader();
-		const projectFont = fontLoader.parse(fontData);
+		const projectFont = fontLoader.parse(fontVirt);
 
 		// set colorspace (for map and matcap) ------------------------------
 		doorColor.colorSpace = THREE.SRGBColorSpace;
@@ -192,13 +193,13 @@
 			gradientMap: gradiant
 		});
 
-		const cone1 = createCone(0.5, 1, undefined, genericBasicMat);
+		const cone1 = createCone(0.5, 1, 16, undefined, genericBasicMat);
 		const sphere1 = createSphere(0.75, undefined, genericMeshNormalMat);
 		const cube3 = createCube(1, 1, 1, 'pink', genericMeshLambertMat);
 		const torus1 = createTorus(1, 0.2, undefined, genericMeshMatcapMat);
 		const torusKnot = createTorusKnot(0.4, 0.13, undefined, genericMeshPhongMaterial);
 		const pill = createCapsule(0.25, 0.5, 'yellow', genericToonMaterial);
-		const text = createTextMesh(projectFont, undefined, genericMeshNormalMat);
+		const text = createTextMesh('Hello, Three', projectFont, undefined, genericMeshNormalMat);
 
 		pill.position.y = -2.5;
 		pill.rotateX(0.9);
@@ -237,6 +238,7 @@
 		// lights
 		const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
 		scene.add(ambientLight);
+
 		const pointLight1 = new THREE.PointLight(0xffffff, 100);
 		pointLight1.position.x = 4;
 		scene.add(pointLight1);

@@ -62,10 +62,11 @@ export function createSphere(
 export function createCone(
 	radius: number,
 	height: number,
+	segments: number,
 	color?: THREE.ColorRepresentation,
 	material?: MaterialTypes
 ): THREE.Mesh {
-	const geometry = new THREE.ConeGeometry(radius, height);
+	const geometry = new THREE.ConeGeometry(radius, height, segments);
 	if (color && material && isColorableMaterial(material)) {
 		material.color = new THREE.Color(color);
 	}
@@ -135,11 +136,12 @@ export function createCapsule(
 }
 
 export function createTextMesh(
+	text: string,
 	font: Font,
 	color?: THREE.ColorRepresentation,
 	material?: MaterialTypes
 ) {
-	const textGeometry = new TextGeometry('sup', {
+	const textGeometry = new TextGeometry(text, {
 		font: font,
 		size: 0.8,
 		depth: 0.2,
