@@ -62,10 +62,11 @@ export function createSphere(
 export function createCone(
 	radius: number,
 	height: number,
+	segments: number,
 	color?: THREE.ColorRepresentation,
 	material?: MaterialTypes
 ): THREE.Mesh {
-	const geometry = new THREE.ConeGeometry(radius, height);
+	const geometry = new THREE.ConeGeometry(radius, height, segments);
 	if (color && material && isColorableMaterial(material)) {
 		material.color = new THREE.Color(color);
 	}
