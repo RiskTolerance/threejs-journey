@@ -68,6 +68,4 @@
 	});
 </script>
 
-<div class="relative h-screen w-full bg-black" id="three" bind:this={threeContainer}>
-	<canvas class="pointer-events-none absolute h-0 w-0"></canvas>
-</div>
+<div class="relative h-screen w-full bg-black" bind:this={threeContainer}></div>
