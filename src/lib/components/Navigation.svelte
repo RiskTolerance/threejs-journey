@@ -10,6 +10,7 @@
 				>
 					<li><a class="hover:text-orange-400" href="/threejs-journey/chapter-1">Chapter 1</a></li>
 					<li><a class="hover:text-orange-400" href="/threejs-journey/chapter-2">Chapter 2</a></li>
+					<li><a class="hover:text-orange-400" href="/threejs-journey/chapter-3">Chapter 3</a></li>
 				</ul>
 			</div>
 		</div>
