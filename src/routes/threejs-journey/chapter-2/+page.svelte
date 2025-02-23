@@ -3,12 +3,7 @@
 	import { Timer } from 'three/addons/misc/Timer.js';
 	import { Sky } from 'three/addons/objects/Sky.js';
 	import * as THREE from 'three';
-	import {
-		createScene,
-		createCamera,
-		createRenderer,
-		createAxisHelper
-	} from '$lib/threeHelpers/general';
+	import { createScene, createCamera, createRenderer } from '$lib/threeHelpers/general';
 	import { OrbitControls } from 'three/examples/jsm/Addons.js';
 
 	let threeContainer: HTMLElement | null = null;
@@ -96,6 +91,7 @@
 		const timer = new Timer();
 		renderer.shadowMap.enabled = true;
 		renderer.shadowMap.type = THREE.PCFShadowMap;
+
 		const animate = () => {
 			renderer.render(scene, camera);
 			timer.update();
