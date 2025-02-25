@@ -9,15 +9,25 @@
 					class="flex flex-col gap-4 text-nowrap rounded-md border-2 border-white bg-black p-4 text-white"
 				>
 					<li><a class="hover:text-orange-400" href="/threejs-journey/chapter-1">Chapter 1</a></li>
-					<li><a class="hover:text-orange-400" href="/threejs-journey/chapter-2">Chapter 2</a></li>
 					<li>
-						<a class="hover:text-orange-400" href="/threejs-journey/chapter-3.1">Chapter 3.1</a>
+						<a class="hover:text-orange-400" href="/threejs-journey/chapter-2.3"
+							>Chapter 2.3 - Haunted House</a
+						>
 					</li>
 					<li>
-						<a class="hover:text-orange-400" href="/threejs-journey/chapter-3.2">Chapter 3.2</a>
+						<a class="hover:text-orange-400" href="/threejs-journey/chapter-2.4"
+							>Chapter 2.4 - Particles</a
+						>
 					</li>
 					<li>
-						<a class="hover:text-orange-400" href="/threejs-journey/chapter-3.3">Chapter 3.3</a>
+						<a class="hover:text-orange-400" href="/threejs-journey/chapter-2.5"
+							>Chapter 2.5 - Galaxy Generator</a
+						>
+					</li>
+					<li>
+						<a class="hover:text-orange-400" href="/threejs-journey/chapter-2.6"
+							>Chapter 2.6 - Scroll-Based Animation</a
+						>
 					</li>
 				</ul>
 			</div>
