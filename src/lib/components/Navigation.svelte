@@ -16,6 +16,9 @@
 					<li>
 						<a class="hover:text-orange-400" href="/threejs-journey/chapter-3.2">Chapter 3.2</a>
 					</li>
+					<li>
+						<a class="hover:text-orange-400" href="/threejs-journey/chapter-3.3">Chapter 3.3</a>
+					</li>
 				</ul>
 			</div>
 		</div>
