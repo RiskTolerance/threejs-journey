@@ -7,7 +7,6 @@
 	let threeContainer: HTMLElement | null = null;
 
 	onMount(() => {
-		console.log('mounted!');
 		const renderer = new T.WebGLRenderer({
 			alpha: true
 		});

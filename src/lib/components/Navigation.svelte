@@ -29,6 +29,11 @@
 							>Chapter 2.6 - Scroll-Based Animation</a
 						>
 					</li>
+					<li>
+						<a class="hover:text-orange-400" href="/threejs-journey/chapter-3.1"
+							>Chapter 3.1 - Physics</a
+						>
+					</li>
 				</ul>
 			</div>
 		</div>
