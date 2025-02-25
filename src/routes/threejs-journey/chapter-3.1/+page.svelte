@@ -4,12 +4,11 @@
 	import { onMount } from 'svelte';
 	import { OrbitControls, RGBELoader } from 'three/examples/jsm/Addons.js';
 	import Stats from 'three/addons/libs/stats.module.js';
-	import hdr from '$lib/assets/hdrs/kloofendal_43d_clear_puresky_2k.hdr';
+	import hdr from '$lib/assets/hdrs/chinese_garden_2k.hdr';
 	import floorArmImage from '$textures/floor/marble_01_arm_1k.jpg';
 	import floorDiffImage from '$textures/floor/marble_01_diff_1k.jpg';
 	import floorNormalImage from '$textures/floor/marble_01_nor_gl_1k.jpg';
 	import floorRoughImage from '$textures/floor/marble_01_rough_1k.jpg';
-	import floorDisplacementImage from '$textures/floor/marble_01_disp_1k.jpg';
 
 	let threeContainer: HTMLElement | null = null;
 
@@ -33,24 +32,25 @@
 
 		const camera = new T.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
 
-		const cubeRenderTarget = new T.WebGLCubeRenderTarget(110);
+		const cubeRenderTarget = new T.WebGLCubeRenderTarget(120);
 		cubeRenderTarget.texture.type = T.HalfFloatType;
 		const cubeCamera = new T.CubeCamera(1, 1000, cubeRenderTarget);
 
 		const material2 = new T.MeshStandardMaterial();
 
-		const material = new T.MeshStandardMaterial({
+		const material = new T.MeshPhysicalMaterial({
 			envMap: cubeRenderTarget.texture,
-			roughness: 0.05,
-			metalness: 1
+			roughness: 0.01,
+			metalness: 0.2,
+			transmission: 1
 		});
 
 		// add geometry
 		const sphere = new T.Mesh(new T.SphereGeometry(), material);
 		const cube = new T.Mesh(new T.BoxGeometry(1, 1, 1), material2);
 		const ico = new T.Mesh(new T.IcosahedronGeometry(), material2);
-		sphere.position.x = 4;
-		cube.position.x = -4;
+		sphere.position.x = 2;
+		cube.position.x = -2;
 		ico.position.y = 5;
 
 		const floorColor = textureLoader.load(floorDiffImage);
