@@ -26,20 +26,40 @@
 			let gravity = { x: 0.0, y: -9.81, z: 0.0 };
 			let world = new R.World(gravity);
 
-			const floorCollider = R.ColliderDesc.cuboid(7.5, 0.1, 7.5);
+			interface SceneObject {
+				mesh: T.Mesh;
+				body: R.RigidBody;
+			}
+			const sceneObjects: SceneObject[] = [];
+
+			const floorCollider = R.ColliderDesc.cuboid(30, 0.1, 30).setRestitution(0.5);
 			const worldFloorCollider = world.createCollider(floorCollider);
 			const worldFloorTranslation = new R.Vector3(0, -1.1, 0);
 			worldFloorCollider.setTranslation(worldFloorTranslation);
 
+			// SPHERE
 			// create dynamic rigid body
 			const rigidBodySphereDesc = R.RigidBodyDesc.dynamic().setTranslation(0, 1, 0);
 			const rigidBodySphere = world.createRigidBody(rigidBodySphereDesc);
 
 			// create a sphere collider attached to the rigid body
-			const colliderSphereDesc = R.ColliderDesc.ball(1);
+			const colliderSphereDesc = R.ColliderDesc.ball(1).setRestitution(1);
 			const colliderSphere = world.createCollider(colliderSphereDesc, rigidBodySphere);
 			rigidBodySphere.setTranslation(new R.Vector3(2, 10, 0), true);
 			colliderSphere.setTranslation(new R.Vector3(2, 10, 0));
+
+			// CUBE
+			// dynamic rigid body
+			const rigidBodyCubeDesc = R.RigidBodyDesc.dynamic().setTranslation(0, 0, 0);
+			const rigidBodyCube = world.createRigidBody(rigidBodyCubeDesc);
+
+			// create cube collider attached to the rigid body
+			const colliderCubeDesc = R.ColliderDesc.cuboid(0.5, 0.5, 0.5).setRestitution(0.1);
+			const colliderCube = world.createCollider(colliderCubeDesc, rigidBodyCube);
+
+			// move the cube and the collider into place
+			rigidBodyCube.setTranslation(new R.Vector3(1, 0, 0), true);
+			colliderCube.setTranslation(new R.Vector3(1, 0, 0));
 
 			rgbeLoader.load(hdr, (envMap) => {
 				envMap.mapping = T.EquirectangularReflectionMapping;
@@ -62,27 +82,28 @@
 			const ico = new T.Mesh(new T.IcosahedronGeometry(), material2);
 			sphere.position.x = 2;
 			sphere.position.y = 10;
-			cube.position.x = -2;
+			cube.position.x = 1;
 			ico.position.y = 5;
 
+			const floorRepeatVal = 18;
 			const floorColor = textureLoader.load(floorDiffImage);
 			floorColor.wrapS = T.RepeatWrapping;
 			floorColor.wrapT = T.RepeatWrapping;
-			floorColor.repeat.set(6, 6);
+			floorColor.repeat.set(floorRepeatVal, floorRepeatVal);
 			const floorARM = textureLoader.load(floorArmImage);
 			floorARM.wrapS = T.RepeatWrapping;
 			floorARM.wrapT = T.RepeatWrapping;
-			floorARM.repeat.set(6, 6);
+			floorARM.repeat.set(floorRepeatVal, floorRepeatVal);
 			const floorNormal = textureLoader.load(floorNormalImage);
 			floorNormal.wrapS = T.RepeatWrapping;
 			floorNormal.wrapT = T.RepeatWrapping;
-			floorNormal.repeat.set(6, 6);
+			floorNormal.repeat.set(floorRepeatVal, floorRepeatVal);
 			const floorRoughness = textureLoader.load(floorRoughImage);
 			floorRoughness.wrapS = T.RepeatWrapping;
 			floorRoughness.wrapT = T.RepeatWrapping;
-			floorRoughness.repeat.set(6, 6);
+			floorRoughness.repeat.set(floorRepeatVal, floorRepeatVal);
 
-			const floor = new T.PlaneGeometry(15, 15);
+			const floor = new T.PlaneGeometry(60, 60);
 			const floorMat = new T.MeshStandardMaterial({
 				normalMap: floorNormal,
 				aoMap: floorARM,
@@ -96,9 +117,9 @@
 			floorMesh.rotateX(-(Math.PI * 2) / 4);
 			floorMesh.position.y = -1;
 
-			camera.position.z = 5;
-			camera.position.y = 5;
-			camera.position.x = 5;
+			camera.position.z = 12;
+			camera.position.y = 12;
+			camera.position.x = 12;
 
 			new OrbitControls(camera, threeContainer);
 
