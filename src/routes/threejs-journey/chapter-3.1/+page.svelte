@@ -2,7 +2,7 @@
 	import * as R from '@dimforge/rapier3d-compat';
 	import * as T from 'three';
 	import { onMount } from 'svelte';
-	import { OrbitControls, RGBELoader, ThreeMFLoader } from 'three/examples/jsm/Addons.js';
+	import { OrbitControls, RGBELoader } from 'three/examples/jsm/Addons.js';
 	import Stats from 'three/addons/libs/stats.module.js';
 	import hdr from '$lib/assets/hdrs/chinese_garden_2k.hdr';
 	import floorArmImage from '$textures/floor/marble_01_arm_1k.jpg';
@@ -30,7 +30,16 @@
 			const worldFloorCollider = world.createCollider(floorCollider);
 			const worldFloorTranslation = new R.Vector3(0, -1.1, 0);
 			worldFloorCollider.setTranslation(worldFloorTranslation);
-			console.log(worldFloorCollider);
+
+			// create dynamic rigid body
+			const rigidBodySphereDesc = R.RigidBodyDesc.dynamic().setTranslation(0, 1, 0);
+			const rigidBodySphere = world.createRigidBody(rigidBodySphereDesc);
+
+			// create a sphere collider attached to the rigid body
+			const colliderSphereDesc = R.ColliderDesc.ball(1);
+			const colliderSphere = world.createCollider(colliderSphereDesc, rigidBodySphere);
+			rigidBodySphere.setTranslation(new R.Vector3(2, 10, 0), true);
+			colliderSphere.setTranslation(new R.Vector3(2, 10, 0));
 
 			rgbeLoader.load(hdr, (envMap) => {
 				envMap.mapping = T.EquirectangularReflectionMapping;
@@ -52,6 +61,7 @@
 			const cube = new T.Mesh(new T.BoxGeometry(1, 1, 1), material2);
 			const ico = new T.Mesh(new T.IcosahedronGeometry(), material2);
 			sphere.position.x = 2;
+			sphere.position.y = 10;
 			cube.position.x = -2;
 			ico.position.y = 5;
 
@@ -104,22 +114,30 @@
 			// use setAttribute to set a position attribute
 			debugGeometry.setAttribute('position', new T.BufferAttribute(positions, 3));
 
-			// pust the values of the debug vertices to the debug geometry
+			// put the values of the debug vertices to the debug geometry
 			for (let i = 0; i < vertices.length / 3; i++) {
 				const i3 = i * 3;
 				positions[i3] = vertices[i3];
 				positions[i3 + 1] = vertices[i3 + 1];
 				positions[i3 + 2] = vertices[i3 + 2];
-				// console.log([vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]]);
 			}
-
-			console.log(positions[0]);
-			console.log(vertices[0]);
 
 			const debugLines = new T.LineSegments(debugGeometry);
 			scene.add(debugLines);
 
+			// const clock = new T.Clock();
+			// let oldElapsed = 0;
+
+			const eventQueue = new R.EventQueue(true);
+
 			const animate = () => {
+				// const elapsedTime = clock.getElapsedTime();
+				// const deltaTime = elapsedTime - oldElapsed;
+				// oldElapsed = elapsedTime;
+				const position = rigidBodySphere.translation();
+				console.log(position);
+				sphere.position.copy(position);
+				world.step(eventQueue);
 				renderer.render(scene, camera);
 			};
 
