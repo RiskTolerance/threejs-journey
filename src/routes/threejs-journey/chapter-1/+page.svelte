@@ -282,7 +282,7 @@
 
 <div class="relative h-screen w-full bg-black" id="three" bind:this={threeContainer}>
 	<canvas class="pointer-events-none absolute h-0 w-0"></canvas>
-	<div class="pointer-events-none absolute left-0 top-0 z-10 h-full w-full p-8">
+	<div class="pointer-events-none absolute left-0 top-0 z-10 h-full w-full p-8 text-[#cc3]">
 		<button class="pointer-events-auto" onclick={ui.fullscreen}>
 			<Fullscreen width="24" height="24" stroke="white"></Fullscreen>
 		</button>

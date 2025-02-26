@@ -2,7 +2,7 @@
 	import * as R from '@dimforge/rapier3d-compat';
 	import * as T from 'three';
 	import { onMount } from 'svelte';
-	import { OrbitControls, RGBELoader } from 'three/examples/jsm/Addons.js';
+	import { OrbitControls, RGBELoader, ThreeMFLoader } from 'three/examples/jsm/Addons.js';
 	import Stats from 'three/addons/libs/stats.module.js';
 	import hdr from '$lib/assets/hdrs/chinese_garden_2k.hdr';
 	import floorArmImage from '$textures/floor/marble_01_arm_1k.jpg';
@@ -28,6 +28,8 @@
 
 			const floorCollider = R.ColliderDesc.cuboid(7.5, 0.1, 7.5);
 			const worldFloorCollider = world.createCollider(floorCollider);
+			const worldFloorTranslation = new R.Vector3(0, -1.1, 0);
+			worldFloorCollider.setTranslation(worldFloorTranslation);
 			console.log(worldFloorCollider);
 
 			rgbeLoader.load(hdr, (envMap) => {
@@ -38,17 +40,11 @@
 
 			const camera = new T.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
 
-			const cubeRenderTarget = new T.WebGLCubeRenderTarget(120);
-			cubeRenderTarget.texture.type = T.HalfFloatType;
-			const cubeCamera = new T.CubeCamera(1, 1000, cubeRenderTarget);
-
 			const material2 = new T.MeshStandardMaterial();
 
-			const material = new T.MeshPhysicalMaterial({
-				envMap: cubeRenderTarget.texture,
+			const material = new T.MeshStandardMaterial({
 				roughness: 0.01,
-				metalness: 0.2,
-				transmission: 1
+				metalness: 0.2
 			});
 
 			// add geometry
@@ -77,15 +73,13 @@
 			floorRoughness.repeat.set(6, 6);
 
 			const floor = new T.PlaneGeometry(15, 15);
-			const floorMat = new T.MeshPhysicalMaterial({
+			const floorMat = new T.MeshStandardMaterial({
 				normalMap: floorNormal,
 				aoMap: floorARM,
 				metalnessMap: floorARM,
 				roughnessMap: floorARM,
 				map: floorColor,
-				clearcoat: 0.1,
-				roughness: 0.1,
-				reflectivity: 1
+				roughness: 0.1
 			});
 			const floorMesh = new T.Mesh(floor, floorMat);
 
@@ -98,64 +92,34 @@
 
 			new OrbitControls(camera, threeContainer);
 
-			scene.add(camera, floorMesh, cubeCamera, sphere, cube, ico);
+			scene.add(camera, floorMesh, sphere, cube, ico);
 
-			const debugMaterial = new T.LineBasicMaterial({ vertexColors: true });
-			const debugGeometry = new T.BufferGeometry();
-			const debugLines = new T.LineSegments(debugGeometry, debugMaterial);
-			scene.add(debugLines);
-
+			// get the vertices of the debug lines
 			const { vertices } = world.debugRender();
 
-			// Prepare arrays to hold our 3D positions and vertex colors.
-			const positions = [];
-			const vertexColors = [];
+			// setup the geometry buffer for the Three scene
+			const debugGeometry = new T.BufferGeometry();
+			// create a float32 that's the same length as the debug array
+			const positions = new Float32Array(vertices.length);
+			// use setAttribute to set a position attribute
+			debugGeometry.setAttribute('position', new T.BufferAttribute(positions, 3));
 
-			// Each line segment is defined by 4 numbers (x1, y1, x2, y2)
-			// and each segment’s color is given by 8 numbers (r, g, b, a for each end).
-
-			function getRandomColor() {
-				// Generate a random hexadecimal color code
-				const letters = '0123456789ABCDEF';
-				let color = '#';
-				for (let i = 0; i < 6; i++) {
-					color += letters[Math.floor(Math.random() * 16)];
-				}
-				return color;
-			}
-			const randomColor = getRandomColor();
-			const randomThreeColor = new T.Color(randomColor);
-
-			const numSegments = vertices.length / 4;
-
-			for (let i = 0; i < numSegments; i++) {
-				const x1 = vertices[i * 4];
-				const y1 = vertices[i * 4 + 1];
-				const x2 = vertices[i * 4 + 2];
-				const y2 = vertices[i * 4 + 3];
-
-				// Convert the 2D positions to 3D (here, we set z = 0).
-				// Note: we also flip the y-axis to match the pixi example.
-				positions.push(x1, -y1, 0);
-				positions.push(x2, -y2, 0);
-
-				// Use the same color for both endpoints.
-				vertexColors.push(randomThreeColor.r, randomThreeColor.g, randomThreeColor.b);
-				vertexColors.push(randomThreeColor.r, randomThreeColor.g, randomThreeColor.b);
+			// pust the values of the debug vertices to the debug geometry
+			for (let i = 0; i < vertices.length / 3; i++) {
+				const i3 = i * 3;
+				positions[i3] = vertices[i3];
+				positions[i3 + 1] = vertices[i3 + 1];
+				positions[i3 + 2] = vertices[i3 + 2];
+				// console.log([vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]]);
 			}
 
-			// Update the geometry attributes.
-			debugGeometry.setAttribute('position', new T.Float32BufferAttribute(positions, 3));
-			debugGeometry.setAttribute('color', new T.Float32BufferAttribute(vertexColors, 3));
-			debugGeometry.attributes.position.needsUpdate = true;
-			debugGeometry.attributes.color.needsUpdate = true;
+			console.log(positions[0]);
+			console.log(vertices[0]);
+
+			const debugLines = new T.LineSegments(debugGeometry);
+			scene.add(debugLines);
 
 			const animate = () => {
-				sphere.visible = false;
-				cubeCamera.position.copy(sphere.position);
-				cubeCamera.update(renderer, scene);
-				sphere.visible = true;
-
 				renderer.render(scene, camera);
 			};
 
