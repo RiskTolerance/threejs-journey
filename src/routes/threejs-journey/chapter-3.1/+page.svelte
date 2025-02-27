@@ -225,6 +225,7 @@
 				const deltaTime = elapsedTime - oldElapsed;
 				oldElapsed = elapsedTime;
 				world.timestep = deltaTime * 1.25;
+				console.log(deltaTime);
 
 				for (const object of sceneObjects) {
 					object.mesh.position.copy(object.body.translation());
