@@ -10,7 +10,11 @@
 	import floorNormalImage from '$textures/floor/marble_01_nor_gl_1k.jpg';
 	import floorRoughImage from '$textures/floor/marble_01_rough_1k.jpg';
 
+	import hitSoundFile from '$lib/assets/sounds/hit.mp3';
+
 	let threeContainer: HTMLElement | null = null;
+	let addSphereButton: HTMLButtonElement | null = null;
+	let addCubeButton: HTMLButtonElement | null = null;
 
 	onMount(() => {
 		R.init().then(() => {
@@ -32,34 +36,109 @@
 			}
 			const sceneObjects: SceneObject[] = [];
 
+			console.log(hitSoundFile);
+			const hitSound = new Audio(hitSoundFile);
+			// hitSound.play().then(() => {
+			// 	console.log('played');
+			// });
+
+			// default material for new objects
+
+			const material = new T.MeshStandardMaterial({
+				roughness: 0.01,
+				metalness: 0.2
+			});
+
+			const createSphere = (
+				diameter: number = 1,
+				position: T.Vector3 = new T.Vector3(0, 0, 0),
+				bounce: number = 1
+			) => {
+				// THREE
+				const geometry = new T.SphereGeometry(diameter);
+				const mesh = new T.Mesh(geometry, material);
+				scene.add(mesh);
+				// RAPIER
+				// rigid body
+				const bodyDesc = R.RigidBodyDesc.dynamic()
+					.setTranslation(position.x, position.y, position.z)
+					.setCanSleep(true);
+				const body = world.createRigidBody(bodyDesc);
+				// collider
+				const colliderDesc = R.ColliderDesc.ball(diameter)
+					.setRestitution(bounce)
+					.setActiveEvents(R.ActiveEvents.CONTACT_FORCE_EVENTS);
+				const collider = world.createCollider(colliderDesc, body);
+
+				sceneObjects.push({
+					mesh,
+					body
+				});
+			};
+
+			const createCube = (
+				dimensions: {
+					x: number;
+					y: number;
+					z: number;
+				} = { x: 1, y: 1, z: 1 },
+				position: T.Vector3 = new T.Vector3(0, 0, 0),
+				bounce: number = 1
+			) => {
+				// THREE
+				const geometry = new T.BoxGeometry(dimensions.x * 2, dimensions.y * 2, dimensions.z * 2);
+				const mesh = new T.Mesh(geometry, material);
+				mesh.position.x = position.x;
+				mesh.position.y = position.y;
+				mesh.position.z = position.z;
+				scene.add(mesh);
+				// RAPIER
+				// body
+				const bodyDesc = R.RigidBodyDesc.dynamic()
+					.setTranslation(position.x, position.y, position.z)
+					.setCanSleep(true);
+				const body = world.createRigidBody(bodyDesc);
+				// collider
+				const colliderDesc = R.ColliderDesc.cuboid(
+					dimensions.x,
+					dimensions.y,
+					dimensions.z
+				).setActiveEvents(R.ActiveEvents.CONTACT_FORCE_EVENTS);
+				const collider = world.createCollider(colliderDesc, body);
+
+				sceneObjects.push({
+					mesh,
+					body
+				});
+			};
+
+			if (addSphereButton && addCubeButton) {
+				addSphereButton.addEventListener('click', () => {
+					const randDiameter = Math.max(Math.random(), 0.25);
+					const randPos: T.Vector3 = new T.Vector3(
+						(Math.random() - 0.5) * 3,
+						10,
+						(Math.random() - 0.5) * 3
+					);
+					createSphere(randDiameter, randPos);
+				});
+				addCubeButton.addEventListener('click', () => {
+					const randDim1 = Math.max(Math.random(), 0.1);
+					const randDim2 = Math.max(Math.random(), 0.1);
+					const randDim3 = Math.max(Math.random(), 0.1);
+					const randPos: T.Vector3 = new T.Vector3(
+						(Math.random() - 0.5) * 3,
+						5,
+						(Math.random() - 0.5) * 3
+					);
+					createCube({ x: randDim1, y: randDim2, z: randDim3 }, randPos);
+				});
+			}
+
 			const floorCollider = R.ColliderDesc.cuboid(30, 0.1, 30).setRestitution(0.5);
 			const worldFloorCollider = world.createCollider(floorCollider);
 			const worldFloorTranslation = new R.Vector3(0, -1.1, 0);
 			worldFloorCollider.setTranslation(worldFloorTranslation);
-
-			// SPHERE
-			// create dynamic rigid body
-			const rigidBodySphereDesc = R.RigidBodyDesc.dynamic().setTranslation(0, 1, 0);
-			const rigidBodySphere = world.createRigidBody(rigidBodySphereDesc);
-
-			// create a sphere collider attached to the rigid body
-			const colliderSphereDesc = R.ColliderDesc.ball(1).setRestitution(1);
-			const colliderSphere = world.createCollider(colliderSphereDesc, rigidBodySphere);
-			rigidBodySphere.setTranslation(new R.Vector3(2, 10, 0), true);
-			colliderSphere.setTranslation(new R.Vector3(2, 10, 0));
-
-			// CUBE
-			// dynamic rigid body
-			const rigidBodyCubeDesc = R.RigidBodyDesc.dynamic().setTranslation(0, 0, 0);
-			const rigidBodyCube = world.createRigidBody(rigidBodyCubeDesc);
-
-			// create cube collider attached to the rigid body
-			const colliderCubeDesc = R.ColliderDesc.cuboid(0.5, 0.5, 0.5).setRestitution(0.1);
-			const colliderCube = world.createCollider(colliderCubeDesc, rigidBodyCube);
-
-			// move the cube and the collider into place
-			rigidBodyCube.setTranslation(new R.Vector3(1, 0, 0), true);
-			colliderCube.setTranslation(new R.Vector3(1, 0, 0));
 
 			rgbeLoader.load(hdr, (envMap) => {
 				envMap.mapping = T.EquirectangularReflectionMapping;
@@ -68,22 +147,6 @@
 			});
 
 			const camera = new T.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
-
-			const material2 = new T.MeshStandardMaterial();
-
-			const material = new T.MeshStandardMaterial({
-				roughness: 0.01,
-				metalness: 0.2
-			});
-
-			// add geometry
-			const sphere = new T.Mesh(new T.SphereGeometry(), material);
-			const cube = new T.Mesh(new T.BoxGeometry(1, 1, 1), material2);
-			const ico = new T.Mesh(new T.IcosahedronGeometry(), material2);
-			sphere.position.x = 2;
-			sphere.position.y = 10;
-			cube.position.x = 1;
-			ico.position.y = 5;
 
 			const floorRepeatVal = 18;
 			const floorColor = textureLoader.load(floorDiffImage);
@@ -123,8 +186,9 @@
 
 			new OrbitControls(camera, threeContainer);
 
-			scene.add(camera, floorMesh, sphere, cube, ico);
+			scene.add(camera, floorMesh);
 
+			// DEBUG BLOCK ---------------------
 			// get the vertices of the debug lines
 			const { vertices } = world.debugRender();
 
@@ -146,19 +210,34 @@
 			const debugLines = new T.LineSegments(debugGeometry);
 			scene.add(debugLines);
 
-			// const clock = new T.Clock();
-			// let oldElapsed = 0;
+			// -----------------------------------
+
+			const clock = new T.Clock();
+			let oldElapsed = 0;
 
 			const eventQueue = new R.EventQueue(true);
 
 			const animate = () => {
-				// const elapsedTime = clock.getElapsedTime();
-				// const deltaTime = elapsedTime - oldElapsed;
-				// oldElapsed = elapsedTime;
-				const position = rigidBodySphere.translation();
-				console.log(position);
-				sphere.position.copy(position);
+				const elapsedTime = clock.getElapsedTime();
+				const deltaTime = elapsedTime - oldElapsed;
+				oldElapsed = elapsedTime;
+				world.timestep = deltaTime * 1.25;
+
+				for (const object of sceneObjects) {
+					object.mesh.position.copy(object.body.translation());
+					object.mesh.quaternion.copy(object.body.rotation());
+				}
+
 				world.step(eventQueue);
+
+				eventQueue.drainContactForceEvents((e) => {
+					const force = e.maxForceMagnitude();
+					if (e.maxForceMagnitude() > 100) {
+						console.log('play!');
+						hitSound.play();
+					}
+				});
+
 				renderer.render(scene, camera);
 			};
 
@@ -172,6 +251,16 @@
 </script>
 
 <div
-	class="flex h-[calc(100vh-56px)] w-full items-center justify-center overflow-clip"
+	class="relative flex h-[calc(100vh-56px)] w-full items-center justify-center overflow-clip"
 	bind:this={threeContainer}
-></div>
+>
+	<div class="absolute left-0 top-0 flex h-20 w-fit gap-4 p-4">
+		<button class="rounded-md border p-2 text-white backdrop-blur-md" bind:this={addSphereButton}
+			>Add Sphere</button
+		>
+
+		<button class="rounded-md border p-2 text-white backdrop-blur-md" bind:this={addCubeButton}
+			>Add Cube</button
+		>
+	</div>
+</div>
