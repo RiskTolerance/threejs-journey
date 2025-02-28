@@ -39,6 +39,11 @@
 							>Chapter 3.2 - Imported Models</a
 						>
 					</li>
+					<li>
+						<a class="hover:text-orange-400" href="/threejs-journey/chapter-3.3"
+							>Chapter 3.3 - Raycaster & Mouse Events</a
+						>
+					</li>
 				</ul>
 			</div>
 		</div>
