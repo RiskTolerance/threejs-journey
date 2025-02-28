@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import * as T from 'three';
 	import { OrbitControls } from 'three/examples/jsm/Addons.js';
-	let threeContainer: HTMLElement | null = null;
+	let threeContainer: HTMLElement;
 
 	const mousePos = $state({
 		x: 0,
@@ -10,18 +10,21 @@
 	});
 
 	const handleMouseMove = (e: MouseEvent) => {
-		mousePos.x = (e.clientX / window.innerWidth) * 2 - 1;
-		mousePos.y = -((e.clientY / window.innerHeight) * 2 - 1);
+		mousePos.x = (e.clientX / threeContainer.offsetWidth) * 2 - 1;
+		mousePos.y = -((e.clientY / threeContainer.offsetHeight) * 2 - 1);
 	};
 
 	onMount(() => {
 		const renderer = new T.WebGLRenderer();
-		renderer.setSize(window.innerWidth, window.innerHeight);
+		renderer.setSize(threeContainer.offsetWidth, threeContainer.offsetHeight);
 		renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 		// scene, lights, camera!
 		const scene = new T.Scene();
-		const camera = new T.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
+		const camera = new T.PerspectiveCamera(
+			75,
+			threeContainer.offsetWidth / threeContainer.offsetHeight
+		);
 		camera.position.set(3, 3, 3);
 		const light = new T.AmbientLight('#ffffff', 8);
 
@@ -159,6 +162,6 @@
 <div
 	role="img"
 	onmousemove={handleMouseMove}
-	class="flex h-[calc(100vh-56px)] w-full items-center justify-center overflow-clip"
+	class="flex h-[calc(100vh-56px)] w-full items-center justify-center overflow-clip [&>canvas]:h-[calc(100vh-56px)]"
 	bind:this={threeContainer}
 ></div>
