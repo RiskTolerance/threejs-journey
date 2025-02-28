@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as R from '@dimforge/rapier3d-compat';
 	import * as T from 'three';
-	import { onMount, tick } from 'svelte';
+	import { onMount } from 'svelte';
 	import { OrbitControls, RGBELoader } from 'three/examples/jsm/Addons.js';
 	import Stats from 'three/addons/libs/stats.module.js';
 	import hdr from '$lib/assets/hdrs/chinese_garden_2k.hdr';

@@ -34,6 +34,11 @@
 							>Chapter 3.1 - Physics</a
 						>
 					</li>
+					<li>
+						<a class="hover:text-orange-400" href="/threejs-journey/chapter-3.2"
+							>Chapter 3.2 - Imported Models</a
+						>
+					</li>
 				</ul>
 			</div>
 		</div>
