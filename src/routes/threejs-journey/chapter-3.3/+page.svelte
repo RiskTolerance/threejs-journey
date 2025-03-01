@@ -11,7 +11,7 @@
 
 	const handleMouseMove = (e: MouseEvent) => {
 		mousePos.x = (e.clientX / threeContainer.offsetWidth) * 2 - 1;
-		mousePos.y = -((e.clientY / threeContainer.offsetHeight) * 2 - 1);
+		mousePos.y = -(((e.clientY - 56) / threeContainer.offsetHeight) * 2 - 1);
 	};
 
 	onMount(() => {
