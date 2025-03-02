@@ -53,6 +53,10 @@
 		const camera = new T.PerspectiveCamera(75, containerWidth / containerHeight, 0.1, 1000);
 		camera.position.set(0, 2, 5);
 
+		let useCubeRenderTarget = false;
+		const cubeRenderTarget = new T.WebGLCubeRenderTarget(256, { type: T.HalfFloatType });
+		const cubeCamera = new T.CubeCamera(0.1, 100, cubeRenderTarget);
+
 		threeContainer.appendChild(renderer.domElement);
 
 		const gltfLoader = new GLTFLoader(loadingManager);
@@ -68,7 +72,7 @@
 
 		new OrbitControls(camera, renderer.domElement);
 
-		// Background, Environment, Fog
+		// Background, Environment
 
 		const environmentMap1 = cubeTextureLoader.load([
 			'/src/lib/assets/hdrs/0/px.png',
@@ -144,7 +148,11 @@
 		);
 
 		scene.background = environmentMap3;
-		scene.environment = environmentMap3;
+		if (useCubeRenderTarget) {
+			scene.environment = cubeRenderTarget.texture;
+		} else {
+			scene.environment = environmentMap3;
+		}
 		scene.environmentIntensity = 4;
 		scene.backgroundIntensity = 1;
 		scene.backgroundBlurriness = 0;
@@ -168,22 +176,29 @@
 		torusKnot.position.set(-2, 1, 0);
 		scene.add(torusKnot);
 
-		const doughnut = new T.Mesh(
-			new T.TorusGeometry(3, 0.05, 100, 80),
-			new T.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: 0.3 })
-		);
+		const doughnutMaterial = new T.MeshStandardMaterial({
+			color: new T.Color(5, 2, 1),
+			// metalness: 1,
+			roughness: 0.3,
+			opacity: 0.8,
+			transparent: true
+		});
+
+		const doughnut = new T.Mesh(new T.TorusGeometry(3, 0.05, 100, 80), doughnutMaterial);
 		doughnut.rotateOnAxis(new T.Vector3(1, 0, 0), Math.PI / 2);
 		doughnut.position.set(0, 1, 0);
 		scene.add(doughnut);
 
-		const doughnut2 = new T.Mesh(
-			new T.TorusGeometry(3.2, 0.05, 100, 80),
-			new T.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: 0.3 })
-		);
+		const doughnut2 = new T.Mesh(new T.TorusGeometry(3.2, 0.05, 100, 80), doughnutMaterial);
 		doughnut2.rotateOnAxis(new T.Vector3(1, 0, 0), Math.PI);
 		doughnut2.rotateOnAxis(new T.Vector3(0, 1, 0), Math.PI / 2);
 		doughnut2.position.set(0, 1, 0);
 		scene.add(doughnut2);
+
+		const doughnut3 = new T.Mesh(new T.TorusGeometry(3.4, 0.05, 100, 80), doughnutMaterial);
+		doughnut3.rotateOnAxis(new T.Vector3(0, 0, 1), Math.PI / 2);
+		doughnut3.position.set(0, 1, 0);
+		scene.add(doughnut3);
 
 		// Helpers
 
@@ -241,13 +256,13 @@
 			'Environment 11 (Grounded Example)': environmentMap11
 		};
 
-		gui
+		bgEnvFolder
 			.add({ environment: 'Environment3' }, 'environment', Object.keys(environmentOptions))
 			.name('Environment Map')
 			.onChange((value: string) => {
 				if (value.includes('Grounded')) {
 					scene.background = null;
-					scene.environment = environmentOptions[value];
+					// scene.environment = environmentOptions[value];
 					scene.children.forEach((child) => {
 						if (child instanceof GroundedSkybox) {
 							scene.remove(child);
@@ -264,12 +279,33 @@
 						}
 					});
 					scene.background = environmentOptions[value];
-					scene.environment = environmentOptions[value];
+					if (useCubeRenderTarget) {
+						scene.environment = cubeRenderTarget.texture;
+					} else {
+						scene.environment = environmentOptions[value];
+					}
 				}
 			})
 			.domElement.childNodes.forEach((child) => {
 				if (child.firstChild instanceof HTMLSelectElement) {
 					child.firstChild.style.backgroundColor = '#1f1f1f';
+				}
+			});
+
+		bgEnvFolder
+			.add({ useCubeRenderTarget: false }, 'useCubeRenderTarget')
+			.name('Use Cube Render Target')
+			.onChange((value: boolean) => {
+				useCubeRenderTarget = value;
+				if (useCubeRenderTarget) {
+					scene.environment = cubeRenderTarget.texture;
+				} else {
+					if (gui) {
+						const selectedEnvironment = gui.controllers
+							.find((controller) => controller.property === 'environment')
+							?.getValue();
+						scene.environment = environmentOptions[selectedEnvironment];
+					}
 				}
 			});
 
@@ -300,6 +336,19 @@
 			const elapsedTime = Clock.getElapsedTime();
 			const deltaTime = elapsedTime - prevTime;
 			prevTime = elapsedTime;
+
+			if (doughnut) {
+				doughnut.rotation.x = elapsedTime;
+			}
+			if (doughnut2) {
+				doughnut2.rotation.x = elapsedTime;
+				doughnut2.rotation.y = elapsedTime;
+			}
+			if (doughnut3) {
+				doughnut3.rotation.y = elapsedTime;
+			}
+
+			cubeCamera.update(renderer, scene);
 
 			renderer.render(scene, camera);
 		};
