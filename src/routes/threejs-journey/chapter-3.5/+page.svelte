@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import * as T from 'three';
-	import { DRACOLoader, GLTFLoader, OrbitControls } from 'three/examples/jsm/Addons.js';
+	import { DRACOLoader, GLTFLoader, OrbitControls, RGBELoader } from 'three/examples/jsm/Addons.js';
 	import GUI from 'lil-gui';
 	import Fullscreen from '$lib/components/icons/Fullscreen.svelte';
+	import { GroundedSkybox } from 'three/addons/objects/GroundedSkybox.js';
 
 	let threeContainer: HTMLDivElement;
 
@@ -58,6 +59,11 @@
 		const dracoLoader = new DRACOLoader(loadingManager);
 		dracoLoader.setDecoderPath('/src/lib/assets/draco/');
 		gltfLoader.setDRACOLoader(dracoLoader);
+
+		const rgbeLoader = new RGBELoader(loadingManager);
+
+		const textureLoader = new T.TextureLoader(loadingManager);
+
 		const cubeTextureLoader = new T.CubeTextureLoader(loadingManager);
 
 		new OrbitControls(camera, renderer.domElement);
@@ -90,6 +96,52 @@
 			'/src/lib/assets/hdrs/2/pz.png',
 			'/src/lib/assets/hdrs/2/nz.png'
 		]);
+
+		const environmentMap4 = rgbeLoader.load('/src/lib/assets/hdrs/0/2k.hdr', (environmentMap) => {
+			environmentMap.mapping = T.EquirectangularReflectionMapping;
+		});
+		const environmentMap5 = rgbeLoader.load('/src/lib/assets/hdrs/1/2k.hdr', (environmentMap) => {
+			environmentMap.mapping = T.EquirectangularReflectionMapping;
+		});
+		const environmentMap6 = rgbeLoader.load('/src/lib/assets/hdrs/2/2k.hdr', (environmentMap) => {
+			environmentMap.mapping = T.EquirectangularReflectionMapping;
+		});
+
+		const environmentMap7 = textureLoader.load(
+			'/src/lib/assets/hdrs/blockadesLabsSkybox/anime_art_style_japan_streets_with_cherry_blossom_.jpg',
+			(environmentMap) => {
+				environmentMap.mapping = T.EquirectangularReflectionMapping;
+				environmentMap.colorSpace = T.SRGBColorSpace;
+			}
+		);
+		const environmentMap8 = textureLoader.load(
+			'/src/lib/assets/hdrs/blockadesLabsSkybox/digital_painting_neon_city_night_orange_lights_.jpg',
+			(environmentMap) => {
+				environmentMap.mapping = T.EquirectangularReflectionMapping;
+				environmentMap.colorSpace = T.SRGBColorSpace;
+			}
+		);
+		const environmentMap9 = textureLoader.load(
+			'/src/lib/assets/hdrs/blockadesLabsSkybox/scifi_white_sky_scrapers_in_clouds_at_day_time.jpg',
+			(environmentMap) => {
+				environmentMap.mapping = T.EquirectangularReflectionMapping;
+				environmentMap.colorSpace = T.SRGBColorSpace;
+			}
+		);
+
+		const environmentMap10 = rgbeLoader.load(
+			'/src/lib/assets/hdrs/blender_render_1.hdr',
+			(environmentMap) => {
+				environmentMap.mapping = T.EquirectangularReflectionMapping;
+			}
+		);
+
+		const environmentMap11 = rgbeLoader.load(
+			'/src/lib/assets/hdrs/chinese_garden_2k.hdr',
+			(environmentMap) => {
+				environmentMap.mapping = T.EquirectangularReflectionMapping;
+			}
+		);
 
 		scene.background = environmentMap3;
 		scene.environment = environmentMap3;
@@ -161,6 +213,7 @@
 			.max(10)
 			.step(0.01)
 			.name('Background Intensity');
+
 		bgEnvFolder
 			.add(scene, 'environmentIntensity')
 			.min(0)
@@ -174,18 +227,45 @@
 			.step(0.01)
 			.name('Background Blurriness');
 
-		const environmentOptions: { [key: string]: T.CubeTexture } = {
+		const environmentOptions: { [key: string]: T.CubeTexture | T.DataTexture | T.Texture } = {
 			Environment1: environmentMap1,
 			Environment2: environmentMap2,
-			Environment3: environmentMap3
+			Environment3: environmentMap3,
+			'Environment 4 (HDR)': environmentMap4,
+			'Environment 5 (HDR)': environmentMap5,
+			'Environment 6 (HDR)': environmentMap6,
+			'Environment 7 (Texture)': environmentMap7,
+			'Environment 8 (Texture)': environmentMap8,
+			'Environment 9 (Texture)': environmentMap9,
+			'Environment 10 (Blender HDR)': environmentMap10,
+			'Environment 11 (Grounded Example)': environmentMap11
 		};
 
 		gui
 			.add({ environment: 'Environment3' }, 'environment', Object.keys(environmentOptions))
 			.name('Environment Map')
 			.onChange((value: string) => {
-				scene.background = environmentOptions[value];
-				scene.environment = environmentOptions[value];
+				if (value.includes('Grounded')) {
+					scene.background = null;
+					scene.environment = environmentOptions[value];
+					scene.children.forEach((child) => {
+						if (child instanceof GroundedSkybox) {
+							scene.remove(child);
+						}
+					});
+					const skybox = new GroundedSkybox(environmentOptions[value], 15, 70);
+					skybox.material.wireframe = false;
+					skybox.position.y = 15;
+					scene.add(skybox);
+				} else {
+					scene.children.forEach((child) => {
+						if (child instanceof GroundedSkybox) {
+							scene.remove(child);
+						}
+					});
+					scene.background = environmentOptions[value];
+					scene.environment = environmentOptions[value];
+				}
 			})
 			.domElement.childNodes.forEach((child) => {
 				if (child.firstChild instanceof HTMLSelectElement) {
