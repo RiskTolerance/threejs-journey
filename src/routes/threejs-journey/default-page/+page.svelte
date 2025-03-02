@@ -23,7 +23,8 @@
 	};
 
 	onMount(() => {
-		// Setup - Loaders, Scene, Camera, Renderer, Initial Container Size
+		// Setup - Loaders, Scene, Camera, Renderer, Initial Container Size, lilGui
+		// TODO: Add lilGui and cleanup
 		containerHeight = threeContainer.offsetHeight;
 		containerWidth = threeContainer.offsetWidth;
 

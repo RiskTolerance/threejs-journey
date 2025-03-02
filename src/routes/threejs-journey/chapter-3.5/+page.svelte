@@ -2,9 +2,12 @@
 	import { onDestroy, onMount } from 'svelte';
 	import * as T from 'three';
 	import { DRACOLoader, GLTFLoader, OrbitControls } from 'three/examples/jsm/Addons.js';
+	import GUI from 'lil-gui';
 	import Fullscreen from '$lib/components/icons/Fullscreen.svelte';
 
 	let threeContainer: HTMLDivElement;
+
+	let gui: GUI | null = null;
 
 	let containerHeight: number = $state(0);
 	let containerWidth: number = $state(0);
@@ -39,25 +42,119 @@
 		const dracoLoader = new DRACOLoader();
 		dracoLoader.setDecoderPath('/src/lib/assets/draco/');
 		gltfLoader.setDRACOLoader(dracoLoader);
+		const cubeTextureLoader = new T.CubeTextureLoader();
 
 		new OrbitControls(camera, renderer.domElement);
 
-		// Geometries, Materials, Meshes, Helpers, Lights
+		// Background, Environment, Fog
+
+		const environmentMap1 = cubeTextureLoader.load([
+			'/src/lib/assets/hdrs/0/px.png',
+			'/src/lib/assets/hdrs/0/nx.png',
+			'/src/lib/assets/hdrs/0/py.png',
+			'/src/lib/assets/hdrs/0/ny.png',
+			'/src/lib/assets/hdrs/0/pz.png',
+			'/src/lib/assets/hdrs/0/nz.png'
+		]);
+
+		const environmentMap2 = cubeTextureLoader.load([
+			'/src/lib/assets/hdrs/1/px.png',
+			'/src/lib/assets/hdrs/1/nx.png',
+			'/src/lib/assets/hdrs/1/py.png',
+			'/src/lib/assets/hdrs/1/ny.png',
+			'/src/lib/assets/hdrs/1/pz.png',
+			'/src/lib/assets/hdrs/1/nz.png'
+		]);
+
+		const environmentMap3 = cubeTextureLoader.load([
+			'/src/lib/assets/hdrs/2/px.png',
+			'/src/lib/assets/hdrs/2/nx.png',
+			'/src/lib/assets/hdrs/2/py.png',
+			'/src/lib/assets/hdrs/2/ny.png',
+			'/src/lib/assets/hdrs/2/pz.png',
+			'/src/lib/assets/hdrs/2/nz.png'
+		]);
+
+		scene.background = environmentMap3;
+		scene.environment = environmentMap3;
+		scene.environmentIntensity = 4;
+		scene.backgroundBlurriness = 0;
+
+		// const pointLight = new T.PointLight(0xffffff, 40);
+		// pointLight.position.set(3, 3, 0);
+		// scene.add(pointLight);
+
+		// Geometries, Materials, Meshes,
+
+		gltfLoader.load('/src/lib/assets/models/FlightHelmet/glTF/FlightHelmet.gltf', (gltf) => {
+			const helmet = gltf.scene;
+			helmet.scale.set(4, 4, 4);
+			scene.add(helmet);
+		});
+
+		const torusKnot = new T.Mesh(
+			new T.TorusKnotGeometry(0.5, 0.15, 100, 16),
+			new T.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: 0.3 })
+		);
+		torusKnot.position.set(-2, 1, 0);
+		scene.add(torusKnot);
+
+		const doughnut = new T.Mesh(
+			new T.TorusGeometry(3, 0.05, 100, 80),
+			new T.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: 0.3 })
+		);
+		doughnut.rotateOnAxis(new T.Vector3(1, 0, 0), Math.PI / 2);
+		doughnut.position.set(0, 1, 0);
+		scene.add(doughnut);
+
+		const doughnut2 = new T.Mesh(
+			new T.TorusGeometry(3.2, 0.05, 100, 80),
+			new T.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: 0.3 })
+		);
+		doughnut2.rotateOnAxis(new T.Vector3(1, 0, 0), Math.PI);
+		doughnut2.rotateOnAxis(new T.Vector3(0, 1, 0), Math.PI / 2);
+		doughnut2.position.set(0, 1, 0);
+		scene.add(doughnut2);
+
+		// Helpers & GUI
+
+		gui = new GUI({
+			width: 300,
+			closeFolders: true
+		});
+		gui.domElement.style.position = 'absolute';
+		gui.domElement.style.top = '0';
+		gui.domElement.style.right = '0';
+		threeContainer.appendChild(gui.domElement);
+
+		// gui.add(pointLight, 'intensity').min(0).max(100).step(0.01).name('Point Light Intensity');
+		gui.add(scene, 'backgroundIntensity').min(0).max(10).step(0.01).name('Background Intensity');
+		gui.add(scene, 'backgroundBlurriness').min(0).max(0.3).step(0.01).name('Background Blurriness');
+
+		const environmentOptions: { [key: string]: T.CubeTexture } = {
+			Environment1: environmentMap1,
+			Environment2: environmentMap2,
+			Environment3: environmentMap3
+		};
+
+		gui
+			.add({ environment: 'Environment3' }, 'environment', Object.keys(environmentOptions))
+			.name('Environment Map')
+			.onChange((value: string) => {
+				scene.background = environmentOptions[value];
+				scene.environment = environmentOptions[value];
+			})
+			.domElement.childNodes.forEach((child) => {
+				if (child.firstChild instanceof HTMLSelectElement) {
+					child.firstChild.style.backgroundColor = '#1f1f1f';
+				}
+			});
+
+		const gridHelper = new T.GridHelper(10, 40);
+		scene.add(gridHelper);
 
 		const axisHelper = new T.AxesHelper(2);
 		scene.add(axisHelper);
-
-		const geometry = new T.BoxGeometry();
-		const material = new T.MeshStandardMaterial({ color: '#ffffff' });
-		const cube = new T.Mesh(geometry, material);
-		scene.add(cube);
-
-		const ambientLight = new T.AmbientLight(0xffffff, 1);
-		scene.add(ambientLight);
-
-		const pointLight = new T.PointLight(0xffffff, 40);
-		pointLight.position.set(3, 3, 0);
-		scene.add(pointLight);
 
 		// Animation Loop
 		const Clock = new T.Clock();
@@ -67,10 +164,6 @@
 			const elapsedTime = Clock.getElapsedTime();
 			const deltaTime = elapsedTime - prevTime;
 			prevTime = elapsedTime;
-
-			cube.rotation.x += 0.01;
-			cube.rotation.y += 0.01;
-			cube.rotation.z += 0.01;
 
 			renderer.render(scene, camera);
 		};
@@ -86,6 +179,12 @@
 			camera.updateProjectionMatrix();
 			renderer.setSize(containerWidth, containerHeight);
 		});
+	});
+
+	onDestroy(() => {
+		if (gui) {
+			gui.destroy();
+		}
 	});
 </script>
 
