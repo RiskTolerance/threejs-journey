@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import * as T from 'three';
-	import { OrbitControls } from 'three/examples/jsm/Addons.js';
+	import { DRACOLoader, GLTFLoader, OrbitControls } from 'three/examples/jsm/Addons.js';
 	import Fullscreen from '$lib/components/icons/Fullscreen.svelte';
 
 	let threeContainer: HTMLDivElement;
@@ -25,19 +25,32 @@
 	onMount(() => {
 		containerHeight = threeContainer.offsetHeight;
 		containerWidth = threeContainer.offsetWidth;
-
+		const gltfLoader = new GLTFLoader();
+		const dracoLoader = new DRACOLoader();
+		dracoLoader.setDecoderPath('/src/lib/assets/draco/');
+		gltfLoader.setDRACOLoader(dracoLoader);
 		const renderer = new T.WebGLRenderer();
 		renderer.setSize(containerWidth, containerHeight);
 
 		const scene = new T.Scene();
 		const camera = new T.PerspectiveCamera(75, containerWidth / containerHeight, 0.1, 1000);
 		threeContainer.appendChild(renderer.domElement);
+		const light = new T.AmbientLight(0xffffff, 0.5);
+		light.position.set(0, 10, 0);
+		scene.add(light);
 
-		const geometry = new T.BoxGeometry();
-		const material = new T.MeshBasicMaterial({ color: 0x00ff00 });
-		const cube = new T.Mesh(geometry, material);
-		scene.add(cube);
+		const pointLight = new T.PointLight(0xff0000, 20);
+		pointLight.position.set(3, 3, 3);
+		scene.add(pointLight);
+		const pointLight2 = new T.PointLight('#3466ef', 80);
+		pointLight2.position.set(-3, -3, 3);
+		scene.add(pointLight2);
 
+		let burger: T.Group | null = null;
+		gltfLoader.load('/src/lib/assets/models/Burger/burger.glb', (gltf) => {
+			burger = gltf.scene;
+			scene.add(burger);
+		});
 		camera.position.set(0, 2, 5);
 
 		new OrbitControls(camera, renderer.domElement);
@@ -48,10 +61,9 @@
 			const elapsedTime = Clock.getElapsedTime();
 			const deltaTime = elapsedTime - prevTime;
 			prevTime = elapsedTime;
-
-			cube.rotation.x += 0.01;
-			cube.rotation.y += 0.01;
-			cube.rotation.z += 0.01;
+			if (burger) {
+				burger.rotation.y += 0.01;
+			}
 
 			renderer.render(scene, camera);
 		};
