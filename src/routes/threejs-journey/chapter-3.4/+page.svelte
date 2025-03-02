@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import * as T from 'three';
 	import { OrbitControls } from 'three/examples/jsm/Addons.js';
 	import Fullscreen from '$lib/components/icons/Fullscreen.svelte';
@@ -73,7 +73,7 @@
 	class="relative flex h-[calc(100vh-56px)] w-full items-center justify-center overflow-clip [&>canvas]:h-[calc(100vh-56px)]"
 	bind:this={threeContainer}
 >
-	<div class="pointer-events-none absolute left-0 top-0 z-10 h-full w-full p-8 text-[#cc3]">
+	<div class="pointer-events-none absolute left-0 top-0 z-10 h-full w-full p-8">
 		<button class="pointer-events-auto" onclick={() => fullscreen(threeContainer)}>
 			<Fullscreen width="24" height="24" stroke="white"></Fullscreen>
 		</button>
