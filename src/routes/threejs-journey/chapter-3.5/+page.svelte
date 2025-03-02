@@ -12,6 +12,8 @@
 	let containerHeight: number = $state(0);
 	let containerWidth: number = $state(0);
 
+	let threeLoaded = $state(false);
+
 	const fullscreen = (container: HTMLDivElement) => {
 		if (container && !document.fullscreenElement) {
 			container.requestFullscreen().then(() => {
@@ -26,6 +28,20 @@
 	};
 
 	onMount(() => {
+		// Loading Manager
+		const loadingManager = new T.LoadingManager(
+			() => {
+				console.log('Loading Complete!');
+				threeLoaded = true;
+			},
+			(url, loaded, total) => {
+				console.log(`Loading ${url}: ${loaded} / ${total}`);
+			},
+			(url) => {
+				console.error(`Error loading ${url}`);
+			}
+		);
+
 		// Setup - Loaders, Scene, Camera, Renderer, Initial Container Size
 		containerHeight = threeContainer.offsetHeight;
 		containerWidth = threeContainer.offsetWidth;
@@ -38,11 +54,11 @@
 
 		threeContainer.appendChild(renderer.domElement);
 
-		const gltfLoader = new GLTFLoader();
-		const dracoLoader = new DRACOLoader();
+		const gltfLoader = new GLTFLoader(loadingManager);
+		const dracoLoader = new DRACOLoader(loadingManager);
 		dracoLoader.setDecoderPath('/src/lib/assets/draco/');
 		gltfLoader.setDRACOLoader(dracoLoader);
-		const cubeTextureLoader = new T.CubeTextureLoader();
+		const cubeTextureLoader = new T.CubeTextureLoader(loadingManager);
 
 		new OrbitControls(camera, renderer.domElement);
 
@@ -78,6 +94,7 @@
 		scene.background = environmentMap3;
 		scene.environment = environmentMap3;
 		scene.environmentIntensity = 4;
+		scene.backgroundIntensity = 1;
 		scene.backgroundBlurriness = 0;
 
 		// const pointLight = new T.PointLight(0xffffff, 40);
@@ -116,7 +133,15 @@
 		doughnut2.position.set(0, 1, 0);
 		scene.add(doughnut2);
 
-		// Helpers & GUI
+		// Helpers
+
+		const gridHelper = new T.GridHelper(10, 40);
+		scene.add(gridHelper);
+
+		const axisHelper = new T.AxesHelper(2);
+		scene.add(axisHelper);
+
+		// GUI - this should come (close to) last, so we have access to all the objects we want to control
 
 		gui = new GUI({
 			width: 300,
@@ -128,8 +153,26 @@
 		threeContainer.appendChild(gui.domElement);
 
 		// gui.add(pointLight, 'intensity').min(0).max(100).step(0.01).name('Point Light Intensity');
-		gui.add(scene, 'backgroundIntensity').min(0).max(10).step(0.01).name('Background Intensity');
-		gui.add(scene, 'backgroundBlurriness').min(0).max(0.3).step(0.01).name('Background Blurriness');
+		const bgEnvFolder = gui.addFolder('Background & Environment');
+
+		bgEnvFolder
+			.add(scene, 'backgroundIntensity')
+			.min(0)
+			.max(10)
+			.step(0.01)
+			.name('Background Intensity');
+		bgEnvFolder
+			.add(scene, 'environmentIntensity')
+			.min(0)
+			.max(10)
+			.step(0.01)
+			.name('Environment Intensity');
+		bgEnvFolder
+			.add(scene, 'backgroundBlurriness')
+			.min(0)
+			.max(0.3)
+			.step(0.01)
+			.name('Background Blurriness');
 
 		const environmentOptions: { [key: string]: T.CubeTexture } = {
 			Environment1: environmentMap1,
@@ -150,11 +193,24 @@
 				}
 			});
 
-		const gridHelper = new T.GridHelper(10, 40);
-		scene.add(gridHelper);
+		const helpersFolder = gui.addFolder('Helpers');
+		const helpers = {
+			gridHelper: true,
+			axisHelper: true
+		};
 
-		const axisHelper = new T.AxesHelper(2);
-		scene.add(axisHelper);
+		helpersFolder
+			.add(helpers, 'gridHelper')
+			.name('Grid Helper')
+			.onChange((value: boolean) => {
+				gridHelper.visible = value;
+			});
+		helpersFolder
+			.add(helpers, 'axisHelper')
+			.name('Axis Helper')
+			.onChange((value: boolean) => {
+				axisHelper.visible = value;
+			});
 
 		// Animation Loop
 		const Clock = new T.Clock();
@@ -196,5 +252,28 @@
 		<button class="pointer-events-auto" onclick={() => fullscreen(threeContainer)}>
 			<Fullscreen width="24" height="24" stroke="white"></Fullscreen>
 		</button>
+	</div>
+	<div
+		class="z-100 absolute left-0 top-0 h-full w-full items-center justify-center bg-black {threeLoaded
+			? 'hidden'
+			: 'flex'}"
+	>
+		<div class="flex animate-pulse items-center gap-2 text-2xl text-white">
+			Loading <span
+				><svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					class="lucide lucide-loader-circle animate-spin"
+					><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg
+				></span
+			>
+		</div>
 	</div>
 </div>
