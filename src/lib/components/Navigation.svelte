@@ -33,6 +33,22 @@
 		{
 			href: '/threejs-journey/chapter-3.3',
 			label: 'Chapter 3.3 - Raycaster & Mouse Events'
+		},
+		{
+			href: '/threejs-journey/chapter-3.4',
+			label: 'Chapter 3.4 - Custom Models With Blender'
+		},
+		{
+			href: '/threejs-journey/chapter-3.5',
+			label: 'Chapter 3.5 - Environment Map'
+		},
+		{
+			href: '/threejs-journey/chapter-3.6',
+			label: 'Chapter 3.6 - Realistic Render'
+		},
+		{
+			href: '/threejs-journey/chapter-3.7',
+			label: 'Chapter 3.7 - Code Structuring For Bigger Projects'
 		}
 	];
 </script>
