@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import * as T from 'three';
-	import { OrbitControls } from 'three/examples/jsm/Addons.js';
+	import { DRACOLoader, GLTFLoader, OrbitControls } from 'three/examples/jsm/Addons.js';
 	import Fullscreen from '$lib/components/icons/Fullscreen.svelte';
 
 	let threeContainer: HTMLDivElement;
@@ -23,27 +23,46 @@
 	};
 
 	onMount(() => {
+		// Setup - Loaders, Scene, Camera, Renderer, Initial Container Size
 		containerHeight = threeContainer.offsetHeight;
 		containerWidth = threeContainer.offsetWidth;
 
 		const renderer = new T.WebGLRenderer();
 		renderer.setSize(containerWidth, containerHeight);
-
 		const scene = new T.Scene();
 		const camera = new T.PerspectiveCamera(75, containerWidth / containerHeight, 0.1, 1000);
+		camera.position.set(0, 2, 5);
+
 		threeContainer.appendChild(renderer.domElement);
 
-		const geometry = new T.BoxGeometry();
-		const material = new T.MeshBasicMaterial({ color: 0x00ff00 });
-		const cube = new T.Mesh(geometry, material);
-		scene.add(cube);
-
-		camera.position.set(0, 2, 5);
+		const gltfLoader = new GLTFLoader();
+		const dracoLoader = new DRACOLoader();
+		dracoLoader.setDecoderPath('/src/lib/assets/draco/');
+		gltfLoader.setDRACOLoader(dracoLoader);
 
 		new OrbitControls(camera, renderer.domElement);
 
+		// Geometries, Materials, Meshes, Helpers, Lights
+
+		const axisHelper = new T.AxesHelper(2);
+		scene.add(axisHelper);
+
+		const geometry = new T.BoxGeometry();
+		const material = new T.MeshStandardMaterial({ color: '#ffffff' });
+		const cube = new T.Mesh(geometry, material);
+		scene.add(cube);
+
+		const ambientLight = new T.AmbientLight(0xffffff, 1);
+		scene.add(ambientLight);
+
+		const pointLight = new T.PointLight(0xffffff, 40);
+		pointLight.position.set(3, 3, 0);
+		scene.add(pointLight);
+
+		// Animation Loop
 		const Clock = new T.Clock();
 		let prevTime = 0;
+
 		const animate = function () {
 			const elapsedTime = Clock.getElapsedTime();
 			const deltaTime = elapsedTime - prevTime;
@@ -58,6 +77,7 @@
 
 		renderer.setAnimationLoop(animate);
 
+		// Events
 		window.addEventListener('resize', () => {
 			if (!threeContainer) return;
 			containerHeight = threeContainer.offsetHeight;
