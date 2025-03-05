@@ -208,7 +208,7 @@
 		const axisHelper = new T.AxesHelper(2);
 		scene.add(axisHelper);
 
-		// GUI - this should come (close to) last, so we have access to all the objects we want to control
+		// GUI
 
 		gui = new GUI({
 			width: 300,
@@ -338,14 +338,19 @@
 			prevTime = elapsedTime;
 
 			if (doughnut) {
-				doughnut.rotation.x = elapsedTime;
+				doughnut.rotation.x = elapsedTime / 4;
 			}
 			if (doughnut2) {
-				doughnut2.rotation.x = elapsedTime;
-				doughnut2.rotation.y = elapsedTime;
+				doughnut2.rotation.x = elapsedTime / 4;
+				doughnut2.rotation.y = elapsedTime / 4;
 			}
 			if (doughnut3) {
-				doughnut3.rotation.y = elapsedTime;
+				doughnut3.rotation.y = elapsedTime / 4;
+			}
+
+			if (torusKnot) {
+				torusKnot.rotation.x = elapsedTime / 4;
+				torusKnot.rotation.y = elapsedTime / 4;
 			}
 
 			cubeCamera.update(renderer, scene);
