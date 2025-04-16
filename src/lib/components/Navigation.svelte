@@ -4,7 +4,7 @@
 	const navItems = [
 		{
 			href: '/threejs-journey/chapter-1',
-			label: 'Chapter 1'
+			label: 'Chapter 1 - Introduction'
 		},
 		{
 			href: '/threejs-journey/chapter-2.3',
@@ -46,9 +46,10 @@
 			href: '/threejs-journey/chapter-3.6',
 			label: 'Chapter 3.6 - Realistic Render'
 		},
+
 		{
-			href: '/threejs-journey/chapter-3.7',
-			label: 'Chapter 3.7 - Code Structuring For Bigger Projects'
+			href: '/threejs-journey/chapter-4.1',
+			label: 'Chapter 4.1 - Shaders'
 		}
 	];
 </script>
