@@ -4,23 +4,24 @@
 	import { DRACOLoader, GLTFLoader, OrbitControls, RGBELoader } from 'three/examples/jsm/Addons.js';
 	import GUI from 'lil-gui';
 	import Fullscreen from '$lib/components/icons/Fullscreen.svelte';
-
-	// loaded state
 	import { tState } from '$lib/chapter_files/4.1/state.svelte';
-	// fullscreen function (linked to tState in function file)
 	import { setup, updateAllMaterials, fullscreen } from '$lib/chapter_files/4.1/utils';
+	import vertexShader from '$lib/chapter_files/4.1/shaders/vertex.vert?raw';
+	import fragmentShader from '$lib/chapter_files/4.1/shaders/fragment.frag?raw';
 	onMount(() => {
 		// run setup function - this will create state for the scene
 		setup().then((res) => {
-			if (tState.renderer && tState.container && tState.renderer && tState.scene) {
-				// tone mapping
-				tState.renderer.toneMapping = T.ReinhardToneMapping;
-				tState.renderer.toneMappingExposure = 1.5;
-				tState.renderer.shadowMap.enabled = true;
-				tState.renderer.shadowMap.type = T.PCFSoftShadowMap;
+			// if res contains an error
+			if (tState.renderer && tState.container && tState.scene) {
+				const { container, renderer, scene } = tState;
+
+				const geometry = new T.PlaneGeometry(1, 1, 32, 32);
+				const material = new T.RawShaderMaterial({ vertexShader, fragmentShader });
+				const mesh = new T.Mesh(geometry, material);
+				scene.add(mesh);
 
 				const gui = new GUI({
-					container: tState.container,
+					container: container,
 					width: 340,
 					title: 'Debug',
 					closeFolders: true
