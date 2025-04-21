@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import * as T from 'three';
-	import { DRACOLoader, GLTFLoader, OrbitControls, RGBELoader } from 'three/examples/jsm/Addons.js';
 	import GUI from 'lil-gui';
 	import Fullscreen from '$lib/components/icons/Fullscreen.svelte';
 	import { tState } from '$lib/chapter_files/4.1/state.svelte';
 	import { setup, updateAllMaterials, fullscreen } from '$lib/chapter_files/4.1/utils';
+
+	// shader imports
 	import vertexShader from '$lib/chapter_files/4.1/shaders/vertex.vert?raw';
 	import fragmentShader from '$lib/chapter_files/4.1/shaders/fragment.frag?raw';
 	onMount(() => {
