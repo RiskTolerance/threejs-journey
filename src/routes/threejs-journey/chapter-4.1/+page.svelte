@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import * as T from 'three';
 	import GUI from 'lil-gui';
 	import Fullscreen from '$lib/components/icons/Fullscreen.svelte';
@@ -20,7 +20,22 @@
 				const { container, renderer, scene } = tState;
 
 				const geometry = new T.PlaneGeometry(1, 1, 32, 32);
-				const material = new T.RawShaderMaterial({ vertexShader, fragmentShader });
+				const count = geometry.attributes.position.count;
+				const randoms = new Float32Array(count);
+				for (let i = 0; i < count; i++) {
+					randoms[i] = Math.random();
+				}
+				geometry.setAttribute('aRandom', new T.BufferAttribute(randoms, 1));
+
+				const material = new T.RawShaderMaterial({
+					vertexShader,
+					fragmentShader,
+					side: T.DoubleSide,
+					uniforms: {
+						uFrequency: { value: new T.Vector2(10, 5) },
+						uTime: { value: 0 }
+					}
+				});
 				const mesh = new T.Mesh(geometry, material);
 				scene.add(mesh);
 
@@ -31,6 +46,18 @@
 					closeFolders: true
 				});
 				gui.domElement.classList.add('absolute', 'top-0', 'right-0');
+				gui
+					.add(material.uniforms.uFrequency.value, 'x')
+					.min(0)
+					.max(20)
+					.step(0.01)
+					.name('frequencyX');
+				gui
+					.add(material.uniforms.uFrequency.value, 'y')
+					.min(0)
+					.max(20)
+					.step(0.01)
+					.name('frequencyY');
 			}
 		});
 
