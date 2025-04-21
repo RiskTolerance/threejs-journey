@@ -8,6 +8,9 @@
 	import { setup, updateAllMaterials, fullscreen } from '$lib/chapter_files/4.1/utils';
 	import vertexShader from '$lib/chapter_files/4.1/shaders/vertex.vert?raw';
 	import fragmentShader from '$lib/chapter_files/4.1/shaders/fragment.frag?raw';
+
+	let gui: any;
+
 	onMount(() => {
 		// run setup function - this will create state for the scene
 		setup().then((res) => {
@@ -20,7 +23,7 @@
 				const mesh = new T.Mesh(geometry, material);
 				scene.add(mesh);
 
-				const gui = new GUI({
+				gui = new GUI({
 					container: container,
 					width: 340,
 					title: 'Debug',
@@ -47,6 +50,14 @@
 				tState.renderer.setSize(tState.width, tState.height);
 			}
 		});
+	});
+
+	onDestroy(() => {
+		if (tState.renderer && tState.container) {
+			tState.renderer.dispose();
+			tState.container.removeChild(tState.renderer.domElement);
+			gui.destroy();
+		}
 	});
 </script>
 
