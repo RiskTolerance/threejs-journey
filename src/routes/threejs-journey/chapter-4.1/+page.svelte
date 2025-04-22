@@ -13,9 +13,7 @@
 	let gui: any;
 
 	onMount(() => {
-		// run setup function - this will create state for the scene
 		setup().then((res) => {
-			// if res contains an error
 			if (tState.renderer && tState.container && tState.scene) {
 				const { container, renderer, scene } = tState;
 
@@ -33,11 +31,29 @@
 					side: T.DoubleSide,
 					uniforms: {
 						uFrequency: { value: new T.Vector2(10, 5) },
-						uTime: { value: 0 }
+						uTime: { value: 0 },
+						uColor: { value: new T.Color(0x00ff00) }
 					}
 				});
 				const mesh = new T.Mesh(geometry, material);
+				mesh.scale.y = 2 / 3;
 				scene.add(mesh);
+
+				// render loop
+				const Clock = new T.Clock();
+				let prevTime: number;
+				const animate = (scene: T.Scene, camera: T.Camera, renderer: T.Renderer) => {
+					const elapsedTime = Clock.getElapsedTime();
+					material.uniforms.uTime.value = elapsedTime;
+					// const deltaTime = elapsedTime - prevTime;
+					// prevTime = elapsedTime;
+					renderer.render(scene, camera);
+				};
+				tState.renderer.setAnimationLoop(() => {
+					if (tState.renderer && tState.scene && tState.camera) {
+						animate(tState.scene, tState.camera, tState.renderer);
+					}
+				});
 
 				gui = new GUI({
 					container: container,
@@ -58,6 +74,8 @@
 					.max(20)
 					.step(0.01)
 					.name('frequencyY');
+
+				gui.addColor(material.uniforms.uColor, 'value').name('color');
 			}
 		});
 

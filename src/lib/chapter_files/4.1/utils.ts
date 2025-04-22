@@ -62,22 +62,6 @@ export const setup = async () => {
 		const axisHelper = new T.AxesHelper(2);
 		tState.scene.add(axisHelper);
 
-		// render loop
-		const Clock = new T.Clock();
-		let prevTime = 0;
-		const animate = (scene: T.Scene, camera: T.Camera, renderer: T.Renderer) => {
-			const elapsedTime = Clock.getElapsedTime();
-			// const deltaTime = elapsedTime - prevTime;
-			prevTime = elapsedTime;
-			renderer.render(scene, camera);
-		};
-
-		tState.renderer.setAnimationLoop(() => {
-			if (tState.renderer && tState.scene && tState.camera) {
-				animate(tState.scene, tState.camera, tState.renderer);
-			}
-		});
-
 		console.log('Three.js scene setup complete!');
 	} catch (err) {
 		console.error('Error setting up Three.js scene:', err);
